@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="day" data-lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Punto Eléctrico CR — Red de Carga Costa Rica</title>
+  <meta name="description" content="Mapa interactivo de cargadores para vehículos eléctricos en Costa Rica." />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar" id="topbar">
+    <div class="topbar-left">
+      <div class="logo">
+        <span class="logo-bolt">⚡</span>
+        <span class="logo-name" data-i18n="appName">Punto Eléctrico CR</span>
+      </div>
+      <div class="stats-strip">
+        <div class="stat-item">
+          <span class="stat-n" id="statTotal">—</span>
+          <span class="stat-l" data-i18n="statStations">estaciones</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <span class="stat-n" id="statOp">—</span>
+          <span class="stat-l" data-i18n="statOperational">operativas</span>
+        </div>
+        <div class="stat-sep"></div>
+        <div class="stat-item">
+          <span class="stat-n" id="statConn">—</span>
+          <span class="stat-l" data-i18n="statConnectors">conectores</span>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="ctrl-btn" id="btnLocate">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+      </button>
+      <button class="ctrl-btn accent" id="btnAdd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span data-i18n="addStation">Agregar</span>
+      </button>
+      <button class="lang-toggle" id="btnLang">
+        <span class="l-es">ES</span>
+        <span class="l-div">/</span>
+        <span class="l-en">EN</span>
+      </button>
+      <button class="theme-toggle" id="btnTheme">
+        <span class="t-day">☀</span>
+        <span class="t-night">☽</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- LAYOUT -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Buscar estación…" data-i18n-ph="searchPh" autocomplete="off" />
+        </div>
+        <div class="filter-row">
+          <select id="filterProvince" class="filter-sel">
+            <option value="" data-i18n="allProvinces">Todas las provincias</option>
+            <option>San José</option><option>Alajuela</option><option>Cartago</option>
+            <option>Heredia</option><option>Guanacaste</option><option>Puntarenas</option><option>Limón</option>
+          </select>
+          <select id="filterStatus" class="filter-sel">
+            <option value="" data-i18n="allStatus">Todos</option>
+            <option value="50" data-i18n="statusOp">Operativo</option>
+            <option value="75" data-i18n="statusPlanned">Planeado</option>
+          </select>
+        </div>
+        <div class="conn-row">
+          <button class="conn-btn active" data-conn="all" data-i18n="all">Todos</button>
+          <button class="conn-btn" data-conn="type2">Type 2</button>
+          <button class="conn-btn" data-conn="ccs">CCS</button>
+          <button class="conn-btn" data-conn="chademo">CHAdeMO</button>
+          <button class="conn-btn" data-conn="type1">Type 1</button>
+          <button class="conn-btn" data-conn="tesla">Tesla</button>
+        </div>
+      </div>
+      <div class="station-list" id="stationList">
+        <div class="list-state" id="listLoading">
+          <div class="spin-ring"></div>
+          <p data-i18n="loading">Cargando…</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAP -->
+    <div class="map-wrap">
+      <div id="map"></div>
+      <button class="fab-menu" id="fabSidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="12" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- DETAIL PANEL -->
+    <div class="detail-panel" id="detailPanel">
+      <button class="detail-close" id="detailClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+
+  </div>
+
+  <!-- ADD MODAL -->
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" role="dialog">
+      <div class="modal-header">
+        <h2 data-i18n="addModalTitle">Agregar Estación</h2>
+        <button class="modal-x" id="modalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-scroll">
+        <p class="modal-hint" data-i18n="addHint">Completa los datos de la nueva estación.</p>
+        <form id="addForm">
+          <div class="fg">
+            <label data-i18n="fName">Nombre *</label>
+            <input type="text" id="f_name" required placeholder="Ej: Mall San Pedro" />
+          </div>
+          <div class="fg-row">
+            <div class="fg">
+              <label data-i18n="fLat">Latitud *</label>
+              <input type="number" id="f_lat" step="any" required placeholder="9.9340" />
+            </div>
+            <div class="fg">
+              <label data-i18n="fLon">Longitud *</label>
+              <input type="number" id="f_lon" step="any" required placeholder="-84.0870" />
+            </div>
+          </div>
+          <div class="fg">
+            <label data-i18n="fAddress">Dirección</label>
+            <input type="text" id="f_address" placeholder="Ej: 200m norte del parque" />
+          </div>
+          <div class="fg-row">
+            <div class="fg">
+              <label data-i18n="fProvince">Provincia</label>
+              <select id="f_province">
+                <option>San José</option><option>Alajuela</option><option>Cartago</option>
+                <option>Heredia</option><option>Guanacaste</option><option>Puntarenas</option><option>Limón</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label data-i18n="fPoints">Puntos de carga</label>
+              <input type="number" id="f_points" min="1" value="2" />
+            </div>
+          </div>
+          <div class="fg">
+            <label data-i18n="fConnType">Tipo de conector</label>
+            <div class="check-group">
+              <label class="ck"><input type="checkbox" value="Type 2 (Mennekes)" /> Type 2</label>
+              <label class="ck"><input type="checkbox" value="CCS (Type 2)" /> CCS</label>
+              <label class="ck"><input type="checkbox" value="CHAdeMO" /> CHAdeMO</label>
+              <label class="ck"><input type="checkbox" value="Type 1 (J1772)" /> Type 1</label>
+              <label class="ck"><input type="checkbox" value="Tesla Supercharger" /> Tesla</label>
+            </div>
+          </div>
+          <div class="fg-row">
+            <div class="fg">
+              <label data-i18n="fPower">Potencia máx (kW)</label>
+              <input type="number" id="f_power" min="1" placeholder="50" />
+            </div>
+            <div class="fg">
+              <label data-i18n="fCost">Costo</label>
+              <select id="f_cost">
+                <option value="Gratuito" data-i18n="free">Gratuito</option>
+                <option value="De pago" data-i18n="paid">De pago</option>
+                <option value="Desconocido" data-i18n="unknown">Desconocido</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg">
+            <label data-i18n="fNetwork">Red / Operador</label>
+            <input type="text" id="f_network" placeholder="ICE, JASEC, privado…" />
+          </div>
+          <div class="fg">
+            <label data-i18n="fHours">Horario</label>
+            <input type="text" id="f_hours" placeholder="24/7" />
+          </div>
+          <div class="fg">
+            <label data-i18n="fNotes">Notas</label>
+            <textarea id="f_notes" rows="2" placeholder="Acceso, estacionamiento…"></textarea>
+          </div>
+          <div class="fg-actions">
+            <button type="button" class="btn-sec" id="btnCancelForm" data-i18n="cancel">Cancelar</button>
+            <button type="submit" class="btn-pri">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span data-i18n="submitAdd">Agregar estación</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
