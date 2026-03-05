@@ -38,6 +38,12 @@ Aquí **LA GENTE** suma los puntos y **TODOS** ganan.
 ---
 
 ## 📱 ASÍ SE VE (en tu cabeza)
+
+[666.webm](https://github.com/user-attachments/assets/6b1a2ec5-d387-496b-9fc2-0dafa45faf2e)
+
+
+
+
 🌞 MODO DÍA 🌚 MODO NOCHE
 
 ┌─────────────┐ ┌─────────────┐
