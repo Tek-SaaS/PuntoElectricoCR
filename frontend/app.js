@@ -1,10 +1,18 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v3.0
+   PUNTO ELÉCTRICO CR — app.js v3.1
    Multi-source fusion · Map-first add flow · Smart merge
    ════════════════════════════════════════════════════════ */
 
-const OCM_KEY  = '190289c8-6d89-4f42-97f2-57a3d608465d';
-const OCM_URL  = 'https://api.openchargemap.io/v3/poi/';
+// ══════════════════════════════════════════════════════════
+//  CONFIGURACIÓN DEL BACKEND (Render)
+//  La API Key está OCULTA en el backend. El frontend solo
+//  llama a esta URL.
+// ══════════════════════════════════════════════════════════
+
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000'                                    // Desarrollo local
+  : 'https://punto-electrico-cr-backend.onrender.com';        // Producción en Render
+
 const CR_CENTER = [9.9340, -84.0870];
 
 /* ══════════════════════════════════════════════════════════
@@ -404,19 +412,24 @@ function pinIcon(color, emoji = '⚡') {
   });
 }
 
-/* ── FETCH OCM ───────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   FETCH OCM — AHORA LLAMA AL BACKEND (Render)
+   La API Key está OCULTA en el servidor.
+   ══════════════════════════════════════════════════════════ */
 async function fetchOCM() {
-  const params = new URLSearchParams({
-    output: 'json', countrycode: 'CR',
-    maxresults: '500', compact: 'false', verbose: 'true',
-    key: OCM_KEY,
-  });
   try {
-    const res = await fetch(`${OCM_URL}?${params}`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    // ✅ El frontend llama a TU backend en Render
+    const res = await fetch(`${API_URL}/api/estaciones`);
+    
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+    
     S.ocm = await res.json();
+    console.log(`✅ ${S.ocm.length} estaciones cargadas desde el backend`);
+    
   } catch (e) {
-    console.warn('OCM fetch error:', e);
+    console.warn('Error al cargar desde el backend:', e);
     toast(t('toastApiErr'), 5000);
     S.ocm = [];
   }
@@ -535,7 +548,6 @@ function buildAll() {
 
   /* 5. LOCAL CR solo como gap-filler: solo aparece si NO hay
      ninguna estación OCM dentro de 150m                        */
-  const ocmUsed = new Set(enriched.map(s => s._id));
   const localGaps = localList.filter(loc => {
     return !ocmList.some(ocm =>
       distKm(loc.lat, loc.lon, ocm.lat, ocm.lon) < ENRICH_RADIUS
