@@ -4,14 +4,34 @@
    ════════════════════════════════════════════════════════ */
 
 // ══════════════════════════════════════════════════════════
-//  CONFIGURACIÓN DEL BACKEND (Render)
-//  La API Key está OCULTA en el backend. El frontend solo
-//  llama a esta URL.
+//  CONFIGURACIÓN DE ENTORNOS - EL BACKEND OCULTA LA API KEY
 // ══════════════════════════════════════════════════════════
 
-const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:5000'                                    // Desarrollo local
-  : 'https://punto-electrico-cr-backend.onrender.com';        // Producción en Render
+// Detectar entorno basado en la URL actual
+function getEnvironment() {
+  const host = window.location.hostname;
+  
+  if (host === 'localhost' || host === '127.0.0.1') return 'local';
+  if (host.includes('staging')) return 'staging';
+  if (host.includes('dev')) return 'development';
+  if (host.includes('github.io')) return 'production';
+  
+  return 'production'; // Por defecto
+}
+
+// URLs de los backends en Render
+const BACKEND_URLS = {
+  production: 'https://punto-electrico-cr-main.onrender.com',
+  staging:    'https://punto-electrico-cr-staging.onrender.com',
+  development: 'https://punto-electrico-cr-dev.onrender.com',
+  local:      'http://localhost:5000'
+};
+
+const ENV = getEnvironment();
+const API_URL = BACKEND_URLS[ENV] || BACKEND_URLS.production;
+
+console.log(`🔧 Entorno: ${ENV}`);
+console.log(`🔗 API_URL: ${API_URL}`);
 
 const CR_CENTER = [9.9340, -84.0870];
 
@@ -426,7 +446,7 @@ async function fetchOCM() {
     }
     
     S.ocm = await res.json();
-    console.log(`✅ ${S.ocm.length} estaciones cargadas desde el backend`);
+    console.log(`✅ ${S.ocm.length} estaciones cargadas desde el backend (${ENV})`);
     
   } catch (e) {
     console.warn('Error al cargar desde el backend:', e);
