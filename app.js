@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v3.1
+   PUNTO ELÉCTRICO CR — app.js v3.2
    Multi-source fusion · Map-first add flow · Smart merge
    ════════════════════════════════════════════════════════ */
 
@@ -10,13 +10,49 @@
 // Detectar entorno basado en la URL actual
 function getEnvironment() {
   const host = window.location.hostname;
+  const pathname = window.location.pathname;
   
-  if (host === 'localhost' || host === '127.0.0.1') return 'local';
-  if (host.includes('staging')) return 'staging';
-  if (host.includes('dev')) return 'development';
-  if (host.includes('github.io')) return 'production';
+  console.log(`🌐 Host: ${host}`);
+  console.log(`📁 Path: ${pathname}`);
   
-  return 'production'; // Por defecto
+  // 1. Desarrollo local
+  if (host === 'localhost' || host === '127.0.0.1') {
+    return 'local';
+  }
+  
+  // 2. GitHub Pages - siempre producción
+  if (host.includes('github.io')) {
+    return 'production';
+  }
+  
+  // 3. Vercel - detección mejorada
+  if (host.includes('vercel.app')) {
+    // Buscar patrones en el hostname
+    // Ejemplo: punto-electrico-cr-git-dev-mikedmartinez93-8666s-projects.vercel.app
+    // Ejemplo: punto-electrico-cr-git-staging-mikedmartinez93-8666s-projects.vercel.app
+    
+    if (host.includes('-staging-') || host.includes('staging')) {
+      return 'staging';
+    }
+    if (host.includes('-dev-') || host.includes('dev-')) {
+      return 'development';
+    }
+    
+    // Para URL de preview con formato: proyecto-git-branch-usuario
+    const match = host.match(/punto-electrico-cr-git-([^-]+)-/);
+    if (match) {
+      const branch = match[1];
+      if (branch === 'staging') return 'staging';
+      if (branch === 'dev') return 'development';
+      if (branch === 'main') return 'production';
+    }
+    
+    // Si no podemos determinar, asumir producción
+    return 'production';
+  }
+  
+  // 4. Por defecto
+  return 'production';
 }
 
 // URLs de los backends en Render
@@ -27,10 +63,11 @@ const BACKEND_URLS = {
   local:      'http://localhost:5000'
 };
 
+// Obtener el entorno y la URL del API
 const ENV = getEnvironment();
 const API_URL = BACKEND_URLS[ENV] || BACKEND_URLS.production;
 
-console.log(`🔧 Entorno: ${ENV}`);
+console.log(`🔧 Entorno detectado: ${ENV}`);
 console.log(`🔗 API_URL: ${API_URL}`);
 
 const CR_CENTER = [9.9340, -84.0870];
@@ -438,8 +475,12 @@ function pinIcon(color, emoji = '⚡') {
    ══════════════════════════════════════════════════════════ */
 async function fetchOCM() {
   try {
+    const url = `${API_URL}/api/estaciones`;
+    console.log(`📡 Llamando a: ${url}`);
+    
     // ✅ El frontend llama a TU backend en Render
-    const res = await fetch(`${API_URL}/api/estaciones`);
+    const res = await fetch(url);
+    console.log(`📡 Respuesta: ${res.status} ${res.statusText}`);
     
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -449,7 +490,7 @@ async function fetchOCM() {
     console.log(`✅ ${S.ocm.length} estaciones cargadas desde el backend (${ENV})`);
     
   } catch (e) {
-    console.warn('Error al cargar desde el backend:', e);
+    console.warn('❌ Error al cargar desde el backend:', e);
     toast(t('toastApiErr'), 5000);
     S.ocm = [];
   }
