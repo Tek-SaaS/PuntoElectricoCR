@@ -21,7 +21,7 @@ function getEnvironment() {
 
 // URLs de los backends en Render
 const BACKEND_URLS = {
-  production: 'https://punto-electrico-cr-main.onrender.com',
+  production: 'https://punto-electrico-cr-backend.onrender.com',
   staging:    'https://punto-electrico-cr-staging.onrender.com',
   development: 'https://punto-electrico-cr-dev.onrender.com',
   local:      'http://localhost:5000'
