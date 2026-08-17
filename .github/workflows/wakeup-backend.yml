@@ -1,0 +1,37 @@
+name: Wake Up Backend
+on:
+  schedule:
+    - cron: '*/5 * * * *'  # Cada 5 minutos
+  workflow_dispatch:        # También se puede ejecutar manual
+
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check backend health
+        id: health
+        run: |
+          # Intentar primera llamada
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" \
+            https://punto-electrico-cr-backend.onrender.com/api/health)
+          echo "status=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "Primera llamada: $HTTP_CODE"
+
+      - name: If sleeping, wait and retry
+        if: steps.health.outputs.status == '503' || steps.health.outputs.status == '504'
+        run: |
+          echo "⏳ Backend dormido, esperando 30 segundos..."
+          sleep 30
+          
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}" \
+            https://punto-electrico-cr-backend.onrender.com/api/health)
+          
+          if [ "$HTTP_CODE" == "200" ]; then
+            echo "✅ Backend despierto!"
+          else
+            echo "⚠️ Backend aún no responde: $HTTP_CODE"
+          fi
+
+      - name: Log result
+        run: |
+          echo "🕐 $(date) - Wake Up Call completada"
