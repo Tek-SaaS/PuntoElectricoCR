@@ -1,14 +1,38 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v4.0
-   Fase 0: arquitectura modular
+   PUNTO ELÉCTRICO CR — app.js v3.1
+   Multi-source fusion · Map-first add flow · Smart merge
+   Tiles: OpenStreetMap (sin API key)
    ════════════════════════════════════════════════════════ */
 
-import { ENV, API_URL, CR_CENTER, FEATURES } from './config.js';
-import {
-  $, distKm, statusInfo, connCategory, pinIcon,
-  escapeHTML, normalize, debounce,
-} from './utils.js';
-import { S, saveUserStations } from './state.js';
+// ══════════════════════════════════════════════════════════
+//  CONFIGURACIÓN DE ENTORNOS - EL BACKEND OCULTA LA API KEY
+// ══════════════════════════════════════════════════════════
+
+function getEnvironment() {
+  const host = window.location.hostname;
+
+  if (host === 'localhost' || host === '127.0.0.1') return 'local';
+  if (host.includes('staging')) return 'staging';
+  if (host.includes('dev')) return 'development';
+  if (host.includes('github.io')) return 'production';
+
+  return 'production';
+}
+
+const BACKEND_URLS = {
+  production: 'https://punto-electrico-cr-backend.onrender.com',
+  staging:    'https://punto-electrico-cr-staging.onrender.com',
+  development: 'https://punto-electrico-cr-dev.onrender.com',
+  local:      'http://localhost:5000'
+};
+
+const ENV = getEnvironment();
+const API_URL = BACKEND_URLS[ENV] || BACKEND_URLS.production;
+
+console.log(`🔧 Entorno: ${ENV}`);
+console.log(`🔗 API_URL: ${API_URL}`);
+
+const CR_CENTER = [9.9340, -84.0870];
 
 /* ══════════════════════════════════════════════════════════
    DATASET LOCAL CR — estaciones conocidas de Costa Rica
@@ -237,7 +261,13 @@ const T = {
   }
 };
 
-/* ── STATUS helpers ──────────────────────────────────── */
+/* ── STATUS ──────────────────────────────────────────── */
+function statusInfo(id) {
+  if (id === 50)  return { key:'op',  cls:'d-op' };
+  if (id === 75)  return { key:'pl',  cls:'d-pl' };
+  if (id === 150) return { key:'off', cls:'d-off' };
+  return { key:'un', cls:'d-un' };
+}
 function statusLabel(key) {
   return { op: t('statusOp2'), pl: t('statusPl'), un: t('statusUn'), off: t('statusOff') }[key] || t('statusUn');
 }
@@ -245,16 +275,50 @@ function statusColor(key) {
   return { op: '#1b6b3a', pl: '#c87c0a', un: '#8a8570', off: '#c0392b' }[key] || '#8a8570';
 }
 
-/* ── TILES ───────────────────────────────────────────── */
-const TILES = {
-  day:   'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
-  night: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+/* ── CONNECTOR CATEGORY ──────────────────────────────── */
+function connCategory(title) {
+  const s = title.toLowerCase();
+  if (s.includes('type 2') || s.includes('mennekes')) return 'type2';
+  if (s.includes('type 1') || s.includes('j1772'))    return 'type1';
+  if (s.includes('ccs'))     return 'ccs';
+  if (s.includes('chademo')) return 'chademo';
+  if (s.includes('tesla'))   return 'tesla';
+  return 'other';
+}
+
+/* ── STATE ───────────────────────────────────────────── */
+const S = {
+  lang:    'es',
+  theme:   'day',
+  ocm:     [],
+  user:    JSON.parse(localStorage.getItem('pe_user_stations') || '[]'),
+  all:     [],
+  filtered:[],
+  activeId: null,
+  search:  '',
+  province:'',
+  status:  '',
+  conn:    'all',
+  map:     null,
+  cluster: null,
+  markerOf:{},
+  addMode:    false,
+  tempMarker: null,
+  pendingLat: null,
+  pendingLon: null,
 };
-const ATTR = '&copy; <a href="https://carto.com">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>';
+
+/* ── TILES — OpenStreetMap (sin API key) ─────────────── */
+const TILES = {
+  day:   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  night: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+};
+const ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 let tileLayer = null;
 
 /* ── HELPERS ─────────────────────────────────────────── */
-const t = k => T[S.lang][k] || k;
+const $  = id => document.getElementById(id);
+const t  = k  => T[S.lang][k] || k;
 
 function toast(msg, ms = 3000) {
   const el = $('toast');
@@ -262,6 +326,16 @@ function toast(msg, ms = 3000) {
   el.classList.add('show');
   clearTimeout(el._t);
   el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+function saveUser() {
+  localStorage.setItem('pe_user_stations', JSON.stringify(S.user));
+}
+
+/* ── DISTANCE en km (Haversine) ──────────────────────── */
+function distKm(la1, lo1, la2, lo2) {
+  const R = 6371, dLa = (la2-la1)*Math.PI/180, dLo = (lo2-lo1)*Math.PI/180;
+  const a = Math.sin(dLa/2)**2 + Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 /* ── I18N ────────────────────────────────────────────── */
@@ -302,7 +376,7 @@ function initMap() {
   });
   S.map.addLayer(S.cluster);
 
-  /* Click → colocar pin */
+  /* ── MAP CLICK → colocar pin ── */
   S.map.on('click', e => {
     if (!S.addMode) return;
     const { lat, lng } = e.latlng;
@@ -340,15 +414,29 @@ function switchTile() {
   tileLayer.bringToBack();
 }
 
+/* ── PIN ICON ────────────────────────────────────────── */
+function pinIcon(color, emoji = '⚡') {
+  return L.divIcon({
+    className: '',
+    html: `<div class="ev-pin" style="background:${color}"><div class="ev-pin-inner">${emoji}</div></div>`,
+    iconSize:   [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -36],
+  });
+}
+
 /* ══════════════════════════════════════════════════════════
-   FETCH — backend (Render)
+   FETCH OCM — AHORA LLAMA AL BACKEND (Render)
    ══════════════════════════════════════════════════════════ */
 async function fetchOCM() {
   try {
     const res = await fetch(`${API_URL}/api/estaciones`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
     S.ocm = await res.json();
-    console.log(`✅ ${S.ocm.length} estaciones desde backend (${ENV})`);
+    console.log(`✅ ${S.ocm.length} estaciones cargadas desde el backend (${ENV})`);
+
   } catch (e) {
     console.warn('Error al cargar desde el backend:', e);
     toast(t('toastApiErr'), 5000);
@@ -362,7 +450,7 @@ async function fetchOCM() {
    ══════════════════════════════════════════════════════════ */
 function buildAll() {
 
-  /* 1. OCM */
+  /* 1. Normalizar OCM — se toman TODOS, sin filtrar */
   const ocmList = S.ocm.map(s => {
     const info = s.AddressInfo || {};
     return {
@@ -390,7 +478,7 @@ function buildAll() {
     };
   });
 
-  /* 2. LOCAL CR */
+  /* 2. Normalizar LOCAL CR */
   const localList = LOCAL_CR.map(s => ({
     _id:      s.id,
     _source:  'local_cr',
@@ -413,7 +501,7 @@ function buildAll() {
     _sources: ['local_cr'],
   }));
 
-  /* 3. Usuario */
+  /* 3. Normalizar usuario */
   const userList = S.user.map(u => ({
     _id:      'usr_' + u.id,
     _source:  'user',
@@ -436,7 +524,7 @@ function buildAll() {
     _sources: ['user'],
   }));
 
-  /* 4. Enriquecer OCM con LOCAL (150m) */
+  /* 4. OCM enriquecido con datos locales */
   const ENRICH_RADIUS = 0.15;
   const enriched = ocmList.map(ocm => {
     const nearby = localList.find(loc =>
@@ -459,12 +547,14 @@ function buildAll() {
     return e;
   });
 
-  /* 5. LOCAL solo si no hay OCM cerca */
-  const localGaps = localList.filter(loc =>
-    !ocmList.some(ocm => distKm(loc.lat, loc.lon, ocm.lat, ocm.lon) < ENRICH_RADIUS)
-  );
+  /* 5. LOCAL CR solo como gap-filler */
+  const localGaps = localList.filter(loc => {
+    return !ocmList.some(ocm =>
+      distKm(loc.lat, loc.lon, ocm.lat, ocm.lon) < ENRICH_RADIUS
+    );
+  });
 
-  /* 6. Unión */
+  /* 6. Combinar */
   S.all = [...enriched, ...localGaps, ...userList].filter(s => s.lat && s.lon);
   updateStats();
   applyFilters();
@@ -477,7 +567,7 @@ function updateStats() {
   $('statConn').textContent  = S.all.reduce((n, s) => n + s.points, 0);
 }
 
-/* ── FILTERS ─────────────────────────────────────────── */
+/* ── FILTER ──────────────────────────────────────────── */
 function applyFilters() {
   const q = S.search.toLowerCase();
   S.filtered = S.all.filter(s => {
@@ -638,8 +728,9 @@ function renderDetail(s) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   ADD STATION
+   ADD STATION — flujo en 3 pasos
    ══════════════════════════════════════════════════════════ */
+
 function enterPlacementMode() {
   S.addMode = true;
   S.pendingLat = null;
@@ -655,8 +746,12 @@ function enterPlacementMode() {
   toast(t('toastSelectPoint'), 4000);
 }
 
-function showPlacementBanner() { $('placementBanner').classList.add('visible'); }
-function hidePlacementBanner() { $('placementBanner').classList.remove('visible'); }
+function showPlacementBanner() {
+  $('placementBanner').classList.add('visible');
+}
+function hidePlacementBanner() {
+  $('placementBanner').classList.remove('visible');
+}
 
 function openModal() {
   $('modalOverlay').classList.add('open');
@@ -681,7 +776,7 @@ function closeAll() {
   $('addForm').reset();
 }
 
-/* Submit */
+/* Submit del formulario */
 $('addForm').addEventListener('submit', e => {
   e.preventDefault();
 
@@ -708,7 +803,7 @@ $('addForm').addEventListener('submit', e => {
   if (!entry.name) { $('f_name').focus(); return; }
 
   S.user.push(entry);
-  saveUserStations();
+  saveUser();
   buildAll();
   closeAll();
   toast(t('toastAdded'));
@@ -737,7 +832,7 @@ function toggleLang() {
   applyI18n();
 }
 
-/* ── FILTERS UI ──────────────────────────────────────── */
+/* ── FILTERS ─────────────────────────────────────────── */
 function initFilters() {
   let timer;
   $('searchInput').addEventListener('input', e => {
@@ -772,25 +867,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('stationList').innerHTML = `<div class="list-state"><div class="spin-ring"></div><p>${t('loading')}</p></div>`;
 
+  /* Botones top bar */
   $('btnAdd').addEventListener('click', enterPlacementMode);
   $('btnLocate').addEventListener('click', locate);
   $('btnTheme').addEventListener('click', toggleTheme);
   $('btnLang').addEventListener('click', toggleLang);
 
+  /* Cancelar desde el banner */
   $('placementCancel').addEventListener('click', closeAll);
 
+  /* Cerrar modal */
   $('modalClose').addEventListener('click', closeAll);
   $('btnCancelForm').addEventListener('click', closeAll);
   $('modalOverlay').addEventListener('click', e => {
     if (e.target === $('modalOverlay')) closeAll();
   });
 
+  /* Cerrar detail panel */
   $('detailClose').addEventListener('click', () => {
     $('detailPanel').classList.remove('open');
     S.activeId = null;
     document.querySelectorAll('.st-item').forEach(el => el.classList.remove('active'));
   });
 
+  /* Atajos de teclado */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeAll();
     if (e.key === '/' && document.activeElement !== $('searchInput')) {

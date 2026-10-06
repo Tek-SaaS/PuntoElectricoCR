@@ -2,6 +2,7 @@
    PUNTO ELÉCTRICO CR — style.css v3.2
    Day: warm cream + deep forest green
    Night: deep navy + electric mint
+   Tiles: OpenStreetMap (sin API key)
    ════════════════════════════════════════════════════════ */
 
 /* ── THEMES ──────────────────────────────────────────── */
@@ -50,7 +51,7 @@
   --shadow:      0 2px 14px rgba(0,0,0,.4);
   --shadow-lg:   0 8px 40px rgba(0,0,0,.55);
   --topbar-bg:   rgba(11,15,23,.93);
-  --map-filter:  brightness(.82) saturate(.85);
+  --map-filter:  invert(1) hue-rotate(180deg) brightness(.85) contrast(.9);
 }
 
 /* ── RESET ───────────────────────────────────────────── */
