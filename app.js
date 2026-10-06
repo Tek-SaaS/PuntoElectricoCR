@@ -1,6 +1,7 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v3.3
-   Sidebar retraíble + detail como burbuja flotante
+   PUNTO ELÉCTRICO CR — app.js v3.4
+   Sidebar retraíble + detail burbuja flotante
+   Detail se cierra al tocar cualquier punto del mapa
    ════════════════════════════════════════════════════════ */
 
 function getEnvironment() {
@@ -213,14 +214,19 @@ function openSidebar() {
   $('sidebar').classList.remove('hidden');
   if (isMobile()) $('sidebarBackdrop').classList.add('visible');
   updateLayoutClass();
-  setTimeout(() => S.map && S.map.invalidateSize(), 350);
+  setTimeout(() => S.map && S.map.invalidateSize(), 400);
 }
 
 function closeSidebar() {
   $('sidebar').classList.add('hidden');
   $('sidebarBackdrop').classList.remove('visible');
   updateLayoutClass();
-  setTimeout(() => S.map && S.map.invalidateSize(), 350);
+  setTimeout(() => S.map && S.map.invalidateSize(), 400);
+}
+
+function toggleSidebar() {
+  if ($('sidebar').classList.contains('hidden')) openSidebar();
+  else closeSidebar();
 }
 
 /* ── DISTANCE ────────────────────────────────────────── */
@@ -275,35 +281,45 @@ function initMap() {
   });
   S.map.addLayer(S.cluster);
 
+  /* Al arrastrar el mapa: cerrar detail (mobile) */
   S.map.on('dragstart', () => {
     if (isMobile() && S.activeId) closeDetailPanel();
   });
 
+  /* Click en el mapa:
+     - Si estamos en modo colocar pin → colocar pin y abrir modal.
+     - Si NO → cerrar detail si está abierto (burbuja desaparece al tocar fuera). */
   S.map.on('click', e => {
-    if (!S.addMode) return;
-    const { lat, lng } = e.latlng;
-    S.pendingLat = lat;
-    S.pendingLon = lng;
+    if (S.addMode) {
+      const { lat, lng } = e.latlng;
+      S.pendingLat = lat;
+      S.pendingLon = lng;
 
-    if (S.tempMarker) S.map.removeLayer(S.tempMarker);
+      if (S.tempMarker) S.map.removeLayer(S.tempMarker);
 
-    S.tempMarker = L.marker([lat, lng], {
-      icon: L.divIcon({
-        className: '',
-        html: `<div class="ev-pin ev-pin-temp" style="background:#f0b429"><div class="ev-pin-inner">📍</div></div>`,
-        iconSize:   [34, 34],
-        iconAnchor: [17, 34],
-      }),
-      zIndexOffset: 9999,
-    }).addTo(S.map);
+      S.tempMarker = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: '',
+          html: `<div class="ev-pin ev-pin-temp" style="background:#f0b429"><div class="ev-pin-inner">📍</div></div>`,
+          iconSize:   [34, 34],
+          iconAnchor: [17, 34],
+        }),
+        zIndexOffset: 9999,
+      }).addTo(S.map);
 
-    $('coordsPillText').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-    $('addForm').querySelector('.btn-pri').disabled = false;
+      $('coordsPillText').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      $('addForm').querySelector('.btn-pri').disabled = false;
 
-    hidePlacementBanner();
-    openModal();
+      hidePlacementBanner();
+      openModal();
+      toast(t('toastPinSet'));
+      return;
+    }
 
-    toast(t('toastPinSet'));
+    /* Modo normal: tocar el fondo cierra la burbuja */
+    if (S.activeId) {
+      closeDetailPanel();
+    }
   });
 }
 
@@ -504,7 +520,11 @@ function renderMarkers() {
     const color = s._user ? '#c87c0a' : statusColor(st.key);
     const emoji = s._user ? '★' : '⚡';
     const m     = L.marker([s.lat, s.lon], { icon: pinIcon(color, emoji) });
-    m.on('click', () => select(s._id));
+    m.on('click', (ev) => {
+      /* Evitamos que el click del pin se propague al mapa y dispare el cierre */
+      if (ev && ev.originalEvent && L.DomEvent) L.DomEvent.stopPropagation(ev);
+      select(s._id);
+    });
     S.cluster.addLayer(m);
     S.markerOf[s._id] = m;
   });
@@ -716,19 +736,16 @@ function initFilters() {
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
 function initSidebar() {
-  // Botón dentro del sidebar (colapsar)
+  // Botón interno del sidebar: colapsar
   $('sidebarCollapse').addEventListener('click', closeSidebar);
 
-  // Pestaña lateral (expandir en desktop)
+  // Pestaña lateral (desktop, cuando está colapsado): expandir
   $('sidebarTab').addEventListener('click', openSidebar);
 
-  // FAB (mobile)
-  $('fabSidebar').addEventListener('click', () => {
-    if ($('sidebar').classList.contains('hidden')) openSidebar();
-    else closeSidebar();
-  });
+  // FAB flotante: toggle (desktop y mobile)
+  $('fabSidebar').addEventListener('click', toggleSidebar);
 
-  // Backdrop en mobile
+  // Backdrop (mobile): cerrar
   $('sidebarBackdrop').addEventListener('click', closeSidebar);
 }
 

@@ -1,245 +1,924 @@
-<!DOCTYPE html>
-<html lang="es" data-theme="day" data-lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Punto Eléctrico CR — Red de Carga Costa Rica</title>
-  <meta name="description" content="Mapa interactivo de cargadores para vehículos eléctricos en Costa Rica." />
+/* ════════════════════════════════════════════════════════
+   PUNTO ELÉCTRICO CR — style.css v3.6
+   Sidebar retraíble consistente + detail burbuja flotante
+   Animaciones sutiles en ambos lados
+   ════════════════════════════════════════════════════════ */
 
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b6b3a'/%3E%3Cpath d='M20 3L9 18h8l-5 11L26 14h-9z' fill='%23ffffff'/%3E%3C/svg%3E">
-  <link rel="alternate icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH5wMKEBcKlGgVLQAAAVVJREFUWMPtlrFKA0EQhr9LLiSFkMIiWFhYWFhYWFhYWFhYWFhYWFhYWFhYBAsLCwsLC4uQwsLCwsLCwsLCwsLCwsIiJOQsJOTuLCwsLCwsLCwsLCwsLCwsLCwsLEIOSSAkhRBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQnQdEdEVEXsRsSci9iLiICJOIuIyIs4i4iIiriLiKiLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCIuAAAAAABJRU5ErkJggg==">
+:root, [data-theme="day"] {
+  --bg:          #f0ebe0;
+  --bg2:         #e5dfd3;
+  --surface:     #fdfaf5;
+  --surface2:    #f5f0e8;
+  --border:      rgba(0,0,0,.09);
+  --border2:     rgba(0,0,0,.15);
+  --text:        #161410;
+  --text-2:      #4a4035;
+  --text-3:      #928570;
+  --accent:      #1b6b3a;
+  --accent-r:    27,107,58;
+  --accent-lt:   #279a52;
+  --accent-bg:   rgba(27,107,58,.08);
+  --accent-mid:  rgba(27,107,58,.22);
+  --green:       #1b6b3a;
+  --amber:       #c87c0a;
+  --red:         #c0392b;
+  --shadow:      0 2px 14px rgba(0,0,0,.08);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,.13);
+  --topbar-bg:   rgba(240,235,224,.92);
+  --topbar-h:    54px;
+  --sidebar-w:   350px;
+  --ease-out:    cubic-bezier(.32, .72, 0, 1);
+  --ease-soft:   cubic-bezier(.16, 1, .3, 1);
+}
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+[data-theme="night"] {
+  --bg:          #0b0f17;
+  --bg2:         #131924;
+  --surface:     #18202e;
+  --surface2:    #1f2a3c;
+  --border:      rgba(255,255,255,.08);
+  --border2:     rgba(255,255,255,.15);
+  --text:        #e8f0e8;
+  --text-2:      #8fc99f;
+  --text-3:      #4a7a5a;
+  --accent:      #2edf78;
+  --accent-r:    46,223,120;
+  --accent-lt:   #52f598;
+  --accent-bg:   rgba(46,223,120,.10);
+  --accent-mid:  rgba(46,223,120,.25);
+  --green:       #2edf78;
+  --amber:       #f0b429;
+  --red:         #ff6b6b;
+  --shadow:      0 2px 14px rgba(0,0,0,.4);
+  --shadow-lg:   0 8px 40px rgba(0,0,0,.55);
+  --topbar-bg:   rgba(11,15,23,.93);
+}
 
-  <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-  </script>
-  <script defer src="/_vercel/insights/script.js"></script>
-</head>
-<body>
+/* ── RESET ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Epilogue', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  transition: background .4s, color .4s;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; outline: none; }
+a { color: var(--accent); }
 
-  <header class="topbar" id="topbar">
-    <div class="topbar-left">
-      <div class="logo">
-        <span class="logo-bolt">⚡</span>
-        <span class="logo-name" data-i18n="appName">Punto Eléctrico CR</span>
-      </div>
-      <div class="stats-strip">
-        <div class="stat-item">
-          <span class="stat-n" id="statTotal">—</span>
-          <span class="stat-l" data-i18n="statStations">estaciones</span>
-        </div>
-        <div class="stat-sep"></div>
-        <div class="stat-item">
-          <span class="stat-n" id="statOp">—</span>
-          <span class="stat-l" data-i18n="statOperational">operativas</span>
-        </div>
-        <div class="stat-sep"></div>
-        <div class="stat-item">
-          <span class="stat-n" id="statConn">—</span>
-          <span class="stat-l" data-i18n="statConnectors">conectores</span>
-        </div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <button class="ctrl-btn" id="btnLocate" aria-label="Localizar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
-      </button>
-      <button class="ctrl-btn accent" id="btnAdd">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        <span data-i18n="addStation">Agregar</span>
-      </button>
-      <button class="lang-toggle" id="btnLang" aria-label="Cambiar idioma">
-        <span class="l-es">ES</span>
-        <span class="l-div">/</span>
-        <span class="l-en">EN</span>
-      </button>
-      <button class="theme-toggle" id="btnTheme" aria-label="Cambiar tema">
-        <span class="t-day">☀</span>
-        <span class="t-night">☽</span>
-      </button>
-    </div>
-  </header>
+/* ── TOP BAR ─────────────────────────────────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  height: var(--topbar-h);
+  background: var(--topbar-bg);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 1.1rem;
+  padding-top: env(safe-area-inset-top, 0);
+  transition: background .4s, border-color .4s;
+}
+.topbar-left  { display: flex; align-items: center; gap: 1.4rem; }
+.topbar-right { display: flex; align-items: center; gap: .5rem; }
 
-  <div class="layout" id="layout">
+.logo { display: flex; align-items: center; gap: .4rem; }
+.logo-bolt {
+  font-size: 1.15rem;
+  animation: boltGlow 2.5s ease-in-out infinite;
+}
+@keyframes boltGlow {
+  0%,100% { filter: drop-shadow(0 0 3px rgba(var(--accent-r),.4)); }
+  50%      { filter: drop-shadow(0 0 9px rgba(var(--accent-r),.85)); }
+}
+.logo-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.05rem; font-weight: 700; font-style: italic;
+  letter-spacing: -.02em; color: var(--text);
+}
 
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-head">
-        <span class="sidebar-title" data-i18n="statStations">Estaciones</span>
-        <button class="sidebar-collapse" id="sidebarCollapse" aria-label="Ocultar lista">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-      </div>
-      <div class="sidebar-top">
-        <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input type="text" id="searchInput" class="search-input" placeholder="Buscar estación…" data-i18n-ph="searchPh" autocomplete="off" />
-        </div>
-        <div class="filter-row">
-          <select id="filterProvince" class="filter-sel">
-            <option value="" data-i18n="allProvinces">Todas las provincias</option>
-            <option>San José</option><option>Alajuela</option><option>Cartago</option>
-            <option>Heredia</option><option>Guanacaste</option><option>Puntarenas</option><option>Limón</option>
-          </select>
-          <select id="filterStatus" class="filter-sel">
-            <option value="" data-i18n="allStatus">Todos</option>
-            <option value="50" data-i18n="statusOp">Operativo</option>
-            <option value="75" data-i18n="statusPlanned">Planeado</option>
-          </select>
-        </div>
-        <div class="conn-row">
-          <button class="conn-btn active" data-conn="all" data-i18n="all">Todos</button>
-          <button class="conn-btn" data-conn="type2">Type 2</button>
-          <button class="conn-btn" data-conn="ccs">CCS</button>
-          <button class="conn-btn" data-conn="chademo">CHAdeMO</button>
-          <button class="conn-btn" data-conn="type1">Type 1</button>
-          <button class="conn-btn" data-conn="tesla">Tesla</button>
-        </div>
-      </div>
-      <div class="station-list" id="stationList">
-        <div class="list-state" id="listLoading">
-          <div class="spin-ring"></div>
-          <p data-i18n="loading">Cargando…</p>
-        </div>
-      </div>
-    </aside>
+.stats-strip { display: flex; align-items: center; gap: .9rem; }
+.stat-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.stat-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .92rem; font-weight: 500; color: var(--accent); line-height: 1;
+}
+.stat-l { font-size: .56rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; }
+.stat-sep { width: 1px; height: 24px; background: var(--border2); }
 
-    <button class="sidebar-tab" id="sidebarTab" aria-label="Mostrar lista">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-    </button>
+.ctrl-btn {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .38rem .75rem; border-radius: 8px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--text-2); font-size: .8rem; font-weight: 500;
+  transition: all .2s;
+}
+.ctrl-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ctrl-btn.accent {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+.ctrl-btn.accent:hover {
+  background: var(--accent-lt); border-color: var(--accent-lt);
+  box-shadow: 0 3px 10px rgba(var(--accent-r),.35);
+  transform: translateY(-1px);
+}
 
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+.lang-toggle, .theme-toggle {
+  display: flex; align-items: center; gap: .25rem;
+  padding: .35rem .65rem; border-radius: 999px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  font-size: .72rem; font-weight: 700; color: var(--text-2);
+  letter-spacing: .04em; transition: all .2s;
+}
+.lang-toggle:hover, .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.l-div { opacity: .3; font-weight: 300; }
+[data-lang="es"] .l-en { opacity: .35; }
+[data-lang="en"] .l-es { opacity: .35; }
+[data-theme="day"]   .t-night { opacity: .3; }
+[data-theme="night"] .t-day   { opacity: .3; }
 
-    <div class="map-wrap">
-      <div id="map"></div>
+/* ── LAYOUT ──────────────────────────────────────────── */
+.layout {
+  display: flex;
+  height: calc(100vh - var(--topbar-h));
+  height: calc(100dvh - var(--topbar-h));
+  margin-top: var(--topbar-h);
+  position: relative;
+}
 
-      <div class="detail-card" id="detailPanel">
-        <button class="detail-close" id="detailClose" aria-label="Cerrar detalle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-        <div class="detail-body" id="detailBody"></div>
-      </div>
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  z-index: 300;
+  box-shadow: 0 0 0 rgba(0,0,0,0);
+  transition:
+    transform .38s var(--ease-out),
+    background .4s,
+    border-color .4s,
+    box-shadow .38s var(--ease-out);
+}
+.sidebar.hidden {
+  transform: translateX(-100%);
+  box-shadow: var(--shadow-lg);
+}
 
-      <div class="placement-banner" id="placementBanner">
-        <div class="placement-banner-inner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-            <circle cx="12" cy="10" r="3"/>
-          </svg>
-          <span data-i18n="placementHint">Toca el mapa para marcar la ubicación</span>
-          <button class="placement-cancel" id="placementCancel" data-i18n="cancel">Cancelar</button>
-        </div>
-      </div>
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .75rem .85rem .45rem;
+  background: var(--surface2);
+  transition: background .4s;
+}
+.sidebar-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: .95rem;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--text-2);
+  letter-spacing: -.01em;
+}
+.sidebar-collapse {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+  flex-shrink: 0;
+}
+.sidebar-collapse:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.sidebar-collapse svg { width: 14px; height: 14px; }
 
-      <button class="fab-menu" id="fabSidebar" aria-label="Mostrar lista">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="12" y2="18"/></svg>
-      </button>
-    </div>
+.sidebar-top {
+  padding: .75rem .9rem .9rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; flex-direction: column; gap: .6rem;
+  transition: background .4s;
+}
 
-  </div>
+/* Pestaña lateral — solo desktop, aparece cuando sidebar está colapsado */
+.sidebar-tab {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  z-index: 310;
+  width: 30px;
+  height: 56px;
+  border-radius: 0 10px 10px 0;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: none;
+  color: var(--text-2);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition:
+    opacity .28s var(--ease-soft),
+    transform .28s var(--ease-soft),
+    color .2s,
+    border-color .2s;
+}
+.sidebar-tab svg { width: 15px; height: 15px; }
+.sidebar-tab:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.layout.sidebar-collapsed .sidebar-tab {
+  display: flex;
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: .12s;
+}
 
-  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true">
-      <div class="modal-drag-handle"></div>
-      <div class="modal-header">
-        <h2 data-i18n="addModalTitle">Agregar Estación</h2>
-        <button class="modal-x" id="modalClose" aria-label="Cerrar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-scroll">
-        <div class="coords-pill" id="coordsPill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span id="coordsPillText">—</span>
-        </div>
+/* Search */
+.search-box {
+  display: flex; align-items: center; gap: .5rem;
+  padding: 0 .75rem;
+  background: var(--surface); border: 1px solid var(--border2); border-radius: 10px;
+  height: 38px; transition: border-color .2s, box-shadow .2s;
+}
+.search-box:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-r),.1);
+}
+.search-box svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--text-3); }
+.search-input {
+  flex: 1; border: none; background: transparent;
+  font-size: .84rem; color: var(--text);
+}
+.search-input::placeholder { color: var(--text-3); }
 
-        <form id="addForm">
-          <input type="hidden" id="f_lat" />
-          <input type="hidden" id="f_lon" />
+.filter-row { display: flex; gap: .45rem; }
+.filter-sel {
+  flex: 1; height: 32px; padding: 0 .55rem;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 7px; font-size: .76rem; color: var(--text-2);
+  cursor: pointer; transition: border-color .2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23888' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .4rem center; background-size: 12px;
+  padding-right: 1.5rem;
+}
+.filter-sel:focus { border-color: var(--accent); }
+[data-theme="night"] .filter-sel { background-color: var(--surface); color: var(--text-2); }
 
-          <div class="fg">
-            <label data-i18n="fName">Nombre *</label>
-            <input type="text" id="f_name" required placeholder="Ej: Mall San Pedro" autocomplete="off" />
-          </div>
-          <div class="fg">
-            <label data-i18n="fAddress">Dirección</label>
-            <input type="text" id="f_address" placeholder="Ej: 200m norte del parque" />
-          </div>
-          <div class="fg-row">
-            <div class="fg">
-              <label data-i18n="fProvince">Provincia</label>
-              <select id="f_province">
-                <option>San José</option><option>Alajuela</option><option>Cartago</option>
-                <option>Heredia</option><option>Guanacaste</option><option>Puntarenas</option><option>Limón</option>
-              </select>
-            </div>
-            <div class="fg">
-              <label data-i18n="fPoints">Puntos de carga</label>
-              <input type="number" id="f_points" min="1" value="2" />
-            </div>
-          </div>
-          <div class="fg">
-            <label data-i18n="fConnType">Tipo de conector</label>
-            <div class="check-group">
-              <label class="ck"><input type="checkbox" value="Type 2 (Mennekes)" /> Type 2</label>
-              <label class="ck"><input type="checkbox" value="CCS (Type 2)" /> CCS</label>
-              <label class="ck"><input type="checkbox" value="CHAdeMO" /> CHAdeMO</label>
-              <label class="ck"><input type="checkbox" value="Type 1 (J1772)" /> Type 1</label>
-              <label class="ck"><input type="checkbox" value="Tesla Supercharger" /> Tesla</label>
-            </div>
-          </div>
-          <div class="fg-row">
-            <div class="fg">
-              <label data-i18n="fPower">Potencia máx (kW)</label>
-              <input type="number" id="f_power" min="1" placeholder="50" />
-            </div>
-            <div class="fg">
-              <label data-i18n="fCost">Costo</label>
-              <select id="f_cost">
-                <option value="Gratuito" data-i18n="free">Gratuito</option>
-                <option value="De pago" data-i18n="paid">De pago</option>
-                <option value="Desconocido" data-i18n="unknown">Desconocido</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg">
-            <label data-i18n="fNetwork">Red / Operador</label>
-            <input type="text" id="f_network" placeholder="ICE, JASEC, privado…" />
-          </div>
-          <div class="fg">
-            <label data-i18n="fHours">Horario</label>
-            <input type="text" id="f_hours" placeholder="24/7" />
-          </div>
-          <div class="fg">
-            <label data-i18n="fNotes">Notas</label>
-            <textarea id="f_notes" rows="2" placeholder="Acceso, estacionamiento…"></textarea>
-          </div>
-          <div class="fg-actions">
-            <button type="button" class="btn-sec" id="btnCancelForm" data-i18n="cancel">Cancelar</button>
-            <button type="submit" class="btn-pri">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              <span data-i18n="submitAdd">Agregar estación</span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+.conn-row { display: flex; flex-wrap: wrap; gap: .3rem; }
+.conn-btn {
+  padding: .22rem .58rem; border-radius: 999px; font-size: .68rem; font-weight: 600;
+  border: 1px solid var(--border2); color: var(--text-3); letter-spacing: .03em;
+  transition: all .18s;
+}
+.conn-btn:hover { border-color: var(--accent); color: var(--accent); }
+.conn-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  <div class="toast" id="toast"></div>
+.station-list {
+  flex: 1; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border2) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.station-list::-webkit-scrollbar { width: 4px; }
+.station-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+.list-state {
+  display: flex; flex-direction: column; align-items: center;
+  gap: .85rem; padding: 3rem 1rem; color: var(--text-3); font-size: .84rem;
+}
+.spin-ring {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid var(--border2); border-top-color: var(--accent);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.no-results {
+  padding: 2.5rem 1rem; text-align: center; color: var(--text-3); font-size: .83rem;
+}
+.no-results strong {
+  display: block; font-family: 'Fraunces', serif; font-size: 1.15rem;
+  color: var(--text-2); margin-bottom: .4rem;
+}
+
+.st-item {
+  display: flex; gap: .7rem; align-items: flex-start;
+  padding: .8rem .95rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .15s;
+}
+.st-item:hover { background: var(--accent-bg); }
+.st-item.active {
+  background: var(--accent-bg);
+  border-left: 3px solid var(--accent);
+  padding-left: calc(.95rem - 2px);
+}
+.st-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.d-op  { background: var(--green); box-shadow: 0 0 5px rgba(var(--accent-r),.5); }
+.d-pl  { background: var(--amber); }
+.d-un  { background: var(--text-3); }
+.d-off { background: var(--red); }
+.st-info { flex: 1; min-width: 0; }
+.st-name {
+  font-weight: 600; font-size: .86rem; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.st-addr {
+  font-size: .73rem; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px;
+}
+.st-tags { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.stag {
+  font-size: .62rem; font-weight: 600; letter-spacing: .03em;
+  padding: .14rem .42rem; border-radius: 4px;
+  background: var(--surface2); color: var(--text-3); border: 1px solid var(--border);
+}
+.stag-g { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-mid); }
+.stag-a { background: rgba(200,124,10,.1); color: var(--amber); border-color: rgba(200,124,10,.25); }
+
+/* ── MAP ─────────────────────────────────────────────── */
+.map-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  margin-left: var(--sidebar-w);
+  transition: margin-left .38s var(--ease-out);
+}
+.layout.sidebar-collapsed .map-wrap {
+  margin-left: 0;
+}
+#map { width: 100%; height: 100%; }
+
+[data-theme="night"] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(.85) contrast(.9);
+}
+.leaflet-tile-pane { transition: filter .35s ease; }
+
+#map.placement-mode { cursor: crosshair !important; }
+#map.placement-mode .leaflet-interactive { cursor: crosshair !important; }
+
+.marker-cluster div {
+  background-color: rgba(var(--accent-r), .88) !important;
+  color: white !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: .7rem !important; font-weight: 500 !important;
+}
+
+/* ── SIDEBAR BACKDROP (mobile) ───────────────────────── */
+.sidebar-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 290;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .28s var(--ease-soft);
+  visibility: hidden;
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.sidebar-backdrop.visible {
+  opacity: 1;
+  pointer-events: all;
+  visibility: visible;
+}
+
+/* ── PLACEMENT BANNER ────────────────────────────────── */
+.placement-banner {
+  position: absolute; top: 1rem; left: 50%;
+  z-index: 800; pointer-events: none; opacity: 0;
+  transition: opacity .25s var(--ease-soft), transform .25s var(--ease-soft);
+  transform: translateX(-50%) translateY(-12px);
+}
+.placement-banner.visible {
+  opacity: 1; pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+.placement-banner-inner {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .6rem 1rem;
+  background: var(--accent); color: #fff;
+  border-radius: 999px;
+  box-shadow: 0 4px 20px rgba(var(--accent-r),.45);
+  font-size: .82rem; font-weight: 600; white-space: nowrap;
+  max-width: 92vw;
+}
+.placement-banner-inner svg { width: 16px; height: 16px; flex-shrink: 0; }
+.placement-banner-inner span { overflow: hidden; text-overflow: ellipsis; }
+.placement-cancel {
+  margin-left: .2rem; padding: .2rem .65rem; border-radius: 999px;
+  background: rgba(255,255,255,.22); color: #fff; border: 1px solid rgba(255,255,255,.35);
+  font-size: .74rem; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: background .15s;
+  flex-shrink: 0;
+}
+.placement-cancel:hover { background: rgba(255,255,255,.35); }
+
+.fab-menu {
+  position: absolute; bottom: 1.25rem; right: 1rem; z-index: 400;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text-2); display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow);
+  transition: transform .2s var(--ease-soft), background .2s, color .2s, border-color .2s, box-shadow .2s;
+}
+.fab-menu svg { width: 18px; height: 18px; }
+.fab-menu:hover {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+  transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(var(--accent-r),.35);
+}
+.fab-menu:active { transform: scale(.96); }
+
+/* ── DETAIL CARD (burbuja flotante) ──────────────────── */
+.detail-card {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 500;
+  width: 340px;
+  max-width: calc(100% - 2rem);
+  max-height: calc(100% - 2rem);
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px) scale(.96);
+  transform-origin: top right;
+  transition:
+    opacity .24s var(--ease-soft),
+    transform .28s var(--ease-soft);
+}
+.detail-card.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.detail-close {
+  position: absolute;
+  top: .55rem;
+  right: .55rem;
+  z-index: 5;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .2s;
+}
+.detail-close:hover {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+  transform: rotate(90deg);
+}
+.detail-close svg { width: 13px; height: 13px; }
+
+.detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.05rem 1.15rem;
+  -webkit-overflow-scrolling: touch;
+}
+.detail-body::-webkit-scrollbar { width: 4px; }
+.detail-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+.d-status-row { display: flex; align-items: center; gap: .4rem; margin-bottom: .5rem; padding-right: 2.2rem; }
+.d-status-dot { width: 8px; height: 8px; border-radius: 50%; }
+.d-status-txt { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.d-name {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.2rem; font-weight: 700; line-height: 1.2; color: var(--text);
+  margin-bottom: .3rem;
+  padding-right: 2.2rem;
+}
+.d-addr { font-size: .78rem; color: var(--text-3); line-height: 1.5; margin-bottom: .85rem; }
+
+.d-section { margin-bottom: 1rem; }
+.d-label {
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--text-3);
+  margin-bottom: .45rem; padding-bottom: .3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.d-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.d-metric {
+  background: var(--surface2); border-radius: 9px;
+  padding: .55rem .65rem; border: 1px solid var(--border);
+}
+.d-metric-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .9rem; font-weight: 500; color: var(--accent);
+}
+.d-metric-key { font-size: .58rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+
+.d-conn-list { display: flex; flex-direction: column; gap: .35rem; }
+.d-conn-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .45rem .65rem; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+}
+.d-conn-name { font-size: .78rem; font-weight: 500; color: var(--text); }
+.d-conn-kw {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .7rem; color: var(--accent);
+}
+
+.d-info-list { display: flex; flex-direction: column; gap: .3rem; }
+.d-info-row { display: flex; gap: .5rem; font-size: .78rem; }
+.d-info-key { color: var(--text-3); min-width: 76px; flex-shrink: 0; }
+.d-info-val { color: var(--text-2); flex: 1; }
+
+.d-btn {
+  display: flex; align-items: center; justify-content: center; gap: .45rem;
+  width: 100%; padding: .6rem; border-radius: 9px;
+  background: var(--accent); color: #fff; font-size: .84rem; font-weight: 600;
+  text-decoration: none; transition: all .2s; margin-top: .5rem;
+}
+.d-btn:hover {
+  background: var(--accent-lt); transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--accent-r),.3);
+  text-decoration: none; color: #fff;
+}
+.d-btn svg { width: 15px; height: 15px; }
+
+.d-user-badge {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .64rem; font-weight: 700; padding: .18rem .5rem;
+  border-radius: 4px; background: var(--accent-bg);
+  color: var(--accent); border: 1px solid var(--accent-mid);
+  margin-bottom: .4rem; letter-spacing: .04em;
+}
+
+/* ── MODAL ───────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,.52); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface); width: 100%; max-width: 540px;
+  max-height: 88vh;
+  max-height: 88dvh;
+  border-radius: 20px 20px 0 0;
+  border: 1px solid var(--border2); border-bottom: none;
+  transform: translateY(100%);
+  transition: transform .38s var(--ease-out), background .4s;
+  overflow: hidden; display: flex; flex-direction: column;
+  position: relative;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+
+.modal-drag-handle {
+  width: 38px; height: 4px; border-radius: 999px;
+  background: var(--border2); margin: .75rem auto 0; flex-shrink: 0;
+}
+
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .85rem 1.4rem .9rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2); flex-shrink: 0;
+}
+.modal-header h2 {
+  font-family: 'Fraunces', serif; font-size: 1.1rem;
+  font-weight: 700; color: var(--text);
+}
+.modal-x {
+  width: 32px; height: 32px; border-radius: 7px;
+  border: 1px solid var(--border2); background: var(--surface);
+  color: var(--text-2); display: flex; align-items: center; justify-content: center;
+  transition: all .2s;
+}
+.modal-x:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.modal-x svg { width: 13px; height: 13px; }
+
+.coords-pill {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem .85rem; margin-bottom: 1rem;
+  background: var(--accent-bg); border: 1px solid var(--accent-mid);
+  border-radius: 10px; color: var(--accent);
+  font-family: 'JetBrains Mono', monospace; font-size: .75rem; font-weight: 500;
+}
+.coords-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.modal-scroll { flex: 1; overflow-y: auto; padding: 1rem 1.4rem 2rem; -webkit-overflow-scrolling: touch; }
+.modal-scroll::-webkit-scrollbar { width: 4px; }
+.modal-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+#addForm { display: flex; flex-direction: column; gap: .85rem; }
+.fg { display: flex; flex-direction: column; gap: .28rem; }
+.fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.fg label {
+  font-size: .72rem; font-weight: 600; color: var(--text-2); letter-spacing: .03em;
+}
+.fg input, .fg select, .fg textarea {
+  padding: .5rem .7rem; border-radius: 8px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  font-size: .84rem; color: var(--text);
+  transition: border-color .2s, box-shadow .2s;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-r),.1);
+}
+.fg textarea { resize: vertical; min-height: 56px; line-height: 1.5; }
+[data-theme="night"] .fg input,
+[data-theme="night"] .fg select,
+[data-theme="night"] .fg textarea { background: var(--surface2); color: var(--text); }
+
+.check-group { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ck {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .76rem; color: var(--text-2); cursor: pointer;
+  padding: .28rem .6rem; border-radius: 6px;
+  border: 1px solid var(--border2); background: var(--surface2);
+  transition: all .15s;
+}
+.ck:hover { border-color: var(--accent); color: var(--accent); }
+.ck input[type="checkbox"] { accent-color: var(--accent); }
+
+.fg-actions { display: flex; gap: .6rem; padding-top: .3rem; }
+.btn-sec {
+  flex: 1; padding: .62rem; border-radius: 9px;
+  border: 1px solid var(--border2); color: var(--text-2);
+  background: var(--surface2); font-size: .86rem; font-weight: 600;
+  transition: all .2s;
+}
+.btn-sec:hover { border-color: var(--red); color: var(--red); }
+.btn-pri {
+  flex: 2; padding: .62rem; border-radius: 9px;
+  background: var(--accent); color: #fff; border: none;
+  font-size: .86rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: .4rem;
+  transition: all .2s;
+}
+.btn-pri svg { width: 15px; height: 15px; }
+.btn-pri:hover {
+  background: var(--accent-lt); transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--accent-r),.3);
+}
+.btn-pri:disabled { opacity: .45; pointer-events: none; }
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 1.5rem; left: 50%;
+  transform: translateX(-50%) translateY(70px);
+  z-index: 3000; padding: .6rem 1.15rem; border-radius: 999px;
+  background: var(--text); color: var(--bg);
+  font-size: .8rem; font-weight: 500;
+  box-shadow: var(--shadow-lg); white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: all .3s var(--ease-soft);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── LEAFLET OVERRIDES ───────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  background: var(--surface) !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 11px !important;
+  box-shadow: var(--shadow-lg) !important;
+  color: var(--text) !important;
+}
+.leaflet-popup-tip { background: var(--surface) !important; }
+.leaflet-popup-content { margin: .65rem .9rem !important; font-family: 'Epilogue', sans-serif !important; font-size: .83rem !important; }
+.leaflet-control-zoom a { background: var(--surface) !important; color: var(--text) !important; border-color: var(--border2) !important; }
+
+.ev-pin {
+  width: 34px; height: 34px; border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex; align-items: center; justify-content: center;
+  border: 2.5px solid rgba(255,255,255,.9);
+  box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+.ev-pin-inner { transform: rotate(45deg); font-size: 13px; line-height: 1; }
+
+.ev-pin-temp { animation: pinPulse .5s var(--ease-soft); }
+@keyframes pinPulse {
+  0%   { transform: rotate(-45deg) scale(0); }
+  60%  { transform: rotate(-45deg) scale(1.15); }
+  100% { transform: rotate(-45deg) scale(1); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 320px; }
+  .st-name { font-size: 0.82rem; }
+  .st-addr { font-size: 0.7rem; }
+}
+
+@media (max-width: 900px) {
+  :root { --topbar-h: 50px; --sidebar-w: 85%; }
+
+  .sidebar {
+    max-width: 340px;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.hidden {
+    /* más profundo en mobile para que se sienta más evidente */
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+
+  .map-wrap { margin-left: 0 !important; }
+
+  .sidebar-tab { display: none !important; }
+
+  .detail-card {
+    top: .5rem;
+    right: .5rem;
+    left: .5rem;
+    width: auto;
+    max-width: none;
+    max-height: 55%;
+    border-radius: 14px;
+    transform-origin: top center;
+  }
+
+  .stats-strip { display: none; }
+  .logo-name { font-size: 0.9rem; }
+
+  .ctrl-btn { padding: 0.3rem 0.5rem; font-size: 0.7rem; }
+  .ctrl-btn span { display: none; }
+
+  .placement-banner { top: 0.5rem; max-width: 94vw; }
+  .placement-banner-inner {
+    font-size: 0.72rem;
+    padding: 0.45rem 0.8rem;
+    gap: 0.4rem;
+  }
+  .placement-cancel { font-size: 0.68rem; padding: 0.15rem 0.5rem; }
+
+  .leaflet-control-zoom { bottom: 80px !important; right: 10px !important; }
+  .leaflet-control-zoom a {
+    width: 34px !important; height: 34px !important;
+    line-height: 34px !important; font-size: 18px !important;
+  }
+  .fab-menu { bottom: 80px !important; }
+}
+
+@media (max-width: 480px) {
+  :root { --topbar-h: 46px; --sidebar-w: 88%; }
+
+  .topbar { padding: 0 0.5rem; }
+  .logo-bolt { font-size: 1rem; }
+  .logo-name { display: none; }
+
+  .ctrl-btn {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.65rem;
+    border-radius: 8px;
+    min-width: 36px;
+    justify-content: center;
+  }
+  .ctrl-btn svg { width: 15px; height: 15px; }
+
+  .lang-toggle, .theme-toggle {
+    padding: 0.35rem 0.55rem;
+    font-size: 0.65rem;
+    min-width: 36px;
+    justify-content: center;
+  }
+  .l-div { display: none; }
+
+  .sidebar { max-width: 320px; }
+  .sidebar-head { padding: 0.6rem 0.7rem 0.35rem; }
+  .sidebar-title { font-size: 0.85rem; }
+  .sidebar-top { padding: 0.6rem 0.7rem 0.75rem; }
+
+  .search-box { height: 36px; padding: 0 0.65rem; }
+  .search-input { font-size: 0.8rem; }
+
+  .filter-sel { height: 30px; font-size: 0.7rem; padding: 0 0.45rem; padding-right: 1.3rem; }
+  .conn-btn { font-size: 0.62rem; padding: 0.2rem 0.45rem; }
+
+  .st-item { padding: 0.7rem 0.8rem; gap: 0.55rem; }
+  .st-name { font-size: 0.8rem; }
+  .st-addr { font-size: 0.67rem; }
+  .st-tags { gap: 0.2rem; }
+  .stag { font-size: 0.57rem; padding: 0.12rem 0.33rem; }
+
+  .detail-card { max-height: 62%; }
+  .detail-body { padding: 0.9rem 0.95rem; }
+  .d-name { font-size: 1.1rem; }
+  .d-addr { font-size: 0.72rem; }
+
+  .modal { max-width: 100%; border-radius: 18px 18px 0 0; max-height: 92dvh; }
+  .modal-header { padding: 0.65rem 1rem; }
+  .modal-header h2 { font-size: 1rem; }
+  .modal-scroll { padding: 0.85rem 1rem 1.6rem; }
+
+  .fg-row { grid-template-columns: 1fr; gap: 0.55rem; }
+  .fg-actions { flex-direction: column; gap: 0.5rem; }
+  .btn-sec, .btn-pri { flex: none; width: 100%; padding: 0.6rem; font-size: 0.82rem; }
+
+  .coords-pill { font-size: 0.67rem; padding: 0.35rem 0.7rem; }
+
+  .toast {
+    font-size: 0.72rem;
+    padding: 0.45rem 0.9rem;
+    bottom: 1rem;
+    white-space: normal;
+    max-width: 90%;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .leaflet-popup-content { font-size: 0.75rem !important; }
+}
+
+@media (max-width: 360px) {
+  :root { --topbar-h: 42px; --sidebar-w: 94%; }
+
+  .sidebar { max-width: 300px; }
+  .st-name { font-size: 0.74rem; }
+  .st-addr { font-size: 0.62rem; }
+  .stag { font-size: 0.52rem; padding: 0.1rem 0.28rem; }
+  .ctrl-btn { font-size: 0.6rem; padding: 0.25rem 0.4rem; min-width: 32px; }
+  .lang-toggle, .theme-toggle { font-size: 0.55rem; padding: 0.25rem 0.4rem; min-width: 32px; }
+  .topbar { padding: 0 0.4rem; }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :root { --sidebar-w: 90%; }
+}
+
+/* ── Modo oscuro ─────────────────────────────────────── */
+[data-theme="night"] .st-item { border-bottom-color: var(--border2); }
+[data-theme="night"] .st-item:hover { background: var(--accent-bg); }
+[data-theme="night"] .stag {
+  background: var(--surface2);
+  color: var(--text-2);
+  border-color: var(--border2);
+}
+[data-theme="night"] .stag-g {
+  background: var(--accent-bg);
+  color: var(--accent);
+  border-color: var(--accent-mid);
+}
+[data-theme="night"] .d-metric { background: var(--surface2); border-color: var(--border2); }
+[data-theme="night"] .d-conn-row { background: var(--surface2); border-color: var(--border2); }
+[data-theme="night"] .modal { border-color: var(--border2); }
+[data-theme="night"] .modal-header { background: var(--surface2); border-bottom-color: var(--border); }
+[data-theme="night"] .fg input,
+[data-theme="night"] .fg select,
+[data-theme="night"] .fg textarea {
+  background: var(--surface2); color: var(--text); border-color: var(--border2);
+}
+[data-theme="night"] .fg input:focus,
+[data-theme="night"] .fg select:focus,
+[data-theme="night"] .fg textarea:focus { border-color: var(--accent); }
+[data-theme="night"] .ck { border-color: var(--border2); background: var(--surface2); }
+[data-theme="night"] .ck:hover { border-color: var(--accent); color: var(--accent); }
+[data-theme="night"] .search-box { background: var(--surface); border-color: var(--border2); }
+[data-theme="night"] .search-box:focus-within { border-color: var(--accent); }
+[data-theme="night"] .filter-sel {
+  background-color: var(--surface); color: var(--text-2); border-color: var(--border2);
+}
+[data-theme="night"] .filter-sel:focus { border-color: var(--accent); }
+[data-theme="night"] .toast { background: var(--text); color: var(--bg); }
+[data-theme="night"] .placement-banner-inner { background: var(--accent); color: #fff; }
+[data-theme="night"] .leaflet-popup-content-wrapper {
+  background: var(--surface) !important; color: var(--text) !important;
+}
+[data-theme="night"] .leaflet-popup-tip { background: var(--surface) !important; }
