@@ -1,0 +1,70 @@
+name: Promote staging → main
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Motivo de la promoción'
+        required: false
+        default: 'Promoción manual'
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PROMOTE_TOKEN }}
+
+      - name: Configurar git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Traer ramas
+        run: git fetch origin staging main
+
+      - name: Verificar que main no tiene commits únicos
+        run: |
+          UNIQUE=$(git log --oneline origin/staging..origin/main | wc -l)
+          echo "Commits en main que no están en staging: $UNIQUE"
+          if [ "$UNIQUE" -gt 0 ]; then
+            echo "main tiene commits que staging no tiene. Abortando."
+            git log --oneline origin/staging..origin/main
+            exit 1
+          fi
+
+      - name: Promover (fast-forward)
+        run: |
+          git checkout main
+          git reset --hard origin/staging
+          git push origin main
+
+      - name: Verificar sincronización
+        run: |
+          STG=$(git rev-parse origin/staging)
+          MAIN=$(git rev-parse origin/main)
+          echo "staging: $STG"
+          echo "main:    $MAIN"
+          if [ "$STG" != "$MAIN" ]; then
+            echo "Hashes no coinciden"
+            exit 1
+          fi
+          echo "main = staging ($STG)"
+
+      - name: Resumen
+        run: |
+          SHORT=$(git rev-parse --short origin/staging)
+          {
+            echo "## staging -> main"
+            echo ""
+            echo "**Commit:** \`$SHORT\`"
+            echo "**Motivo:** ${{ inputs.reason }}"
+            echo ""
+            echo "Produccion actualizada en ~1 min."
+          } >> $GITHUB_STEP_SUMMARY
