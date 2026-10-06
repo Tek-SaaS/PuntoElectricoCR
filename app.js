@@ -1,7 +1,6 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v3.4
-   Sidebar retraíble + detail burbuja flotante
-   Detail se cierra al tocar cualquier punto del mapa
+   PUNTO ELÉCTRICO CR — app.js v3.5
+   Zoom en esquina inferior derecha
    ════════════════════════════════════════════════════════ */
 
 function getEnvironment() {
@@ -259,13 +258,15 @@ function initMap() {
   S.map = L.map('map', {
     center: CR_CENTER,
     zoom: 8,
-    zoomControl: true,
+    zoomControl: false,
     minZoom: 7,
     maxBounds: [[7.0, -88.0], [12.5, -81.5]],
     maxBoundsViscosity: 1.0,
   });
   tileLayer = L.tileLayer(TILES[S.theme], { attribution: ATTR, maxZoom: 19 });
   tileLayer.addTo(S.map);
+
+  L.control.zoom({ position: 'bottomright' }).addTo(S.map);
 
   S.cluster = L.markerClusterGroup({
     chunkedLoading: true, maxClusterRadius: 55,
@@ -281,14 +282,10 @@ function initMap() {
   });
   S.map.addLayer(S.cluster);
 
-  /* Al arrastrar el mapa: cerrar detail (mobile) */
   S.map.on('dragstart', () => {
     if (isMobile() && S.activeId) closeDetailPanel();
   });
 
-  /* Click en el mapa:
-     - Si estamos en modo colocar pin → colocar pin y abrir modal.
-     - Si NO → cerrar detail si está abierto (burbuja desaparece al tocar fuera). */
   S.map.on('click', e => {
     if (S.addMode) {
       const { lat, lng } = e.latlng;
@@ -316,7 +313,6 @@ function initMap() {
       return;
     }
 
-    /* Modo normal: tocar el fondo cierra la burbuja */
     if (S.activeId) {
       closeDetailPanel();
     }
@@ -521,7 +517,6 @@ function renderMarkers() {
     const emoji = s._user ? '★' : '⚡';
     const m     = L.marker([s.lat, s.lon], { icon: pinIcon(color, emoji) });
     m.on('click', (ev) => {
-      /* Evitamos que el click del pin se propague al mapa y dispare el cierre */
       if (ev && ev.originalEvent && L.DomEvent) L.DomEvent.stopPropagation(ev);
       select(s._id);
     });
@@ -736,16 +731,9 @@ function initFilters() {
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
 function initSidebar() {
-  // Botón interno del sidebar: colapsar
   $('sidebarCollapse').addEventListener('click', closeSidebar);
-
-  // Pestaña lateral (desktop, cuando está colapsado): expandir
   $('sidebarTab').addEventListener('click', openSidebar);
-
-  // FAB flotante: toggle (desktop y mobile)
   $('fabSidebar').addEventListener('click', toggleSidebar);
-
-  // Backdrop (mobile): cerrar
   $('sidebarBackdrop').addEventListener('click', closeSidebar);
 }
 
@@ -755,13 +743,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initFilters();
   initSidebar();
 
-  // En mobile el sidebar arranca oculto
   if (isMobile()) {
     $('sidebar').classList.add('hidden');
   }
   updateLayoutClass();
 
-  // Al cruzar el breakpoint mobile/desktop
   let prevMobile = isMobile();
   window.addEventListener('resize', () => {
     const nowMobile = isMobile();
