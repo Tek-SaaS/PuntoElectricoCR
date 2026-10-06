@@ -51,6 +51,6 @@ MIT © 2026 MikeDMart. Map data © OpenStreetMap contributors. Charger data from
 
 **Made in Costa Rica 🇨🇷 for everyone who drives electric ⚡**
 
-[🗺️ **Open the live map**](https://mikedmart.github.io/Punto-Electrico-CR/)
+[🗺️ **Open the live map**](https://punto-electrico-cr.vercel.app/)
 
 </div>
