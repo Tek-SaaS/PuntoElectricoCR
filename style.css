@@ -1,7 +1,6 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — style.css v3.6
-   Sidebar retraíble consistente + detail burbuja flotante
-   Animaciones sutiles en ambos lados
+   PUNTO ELÉCTRICO CR — style.css v3.7
+   FAB en esquina superior izquierda, alineado con sidebar
    ════════════════════════════════════════════════════════ */
 
 :root, [data-theme="day"] {
@@ -54,7 +53,6 @@
   --topbar-bg:   rgba(11,15,23,.93);
 }
 
-/* ── RESET ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
 body {
@@ -215,43 +213,8 @@ a { color: var(--accent); }
   transition: background .4s;
 }
 
-/* Pestaña lateral — solo desktop, aparece cuando sidebar está colapsado */
-.sidebar-tab {
-  position: absolute;
-  top: 1rem;
-  left: 0;
-  z-index: 310;
-  width: 30px;
-  height: 56px;
-  border-radius: 0 10px 10px 0;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-left: none;
-  color: var(--text-2);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  box-shadow: var(--shadow);
-  opacity: 0;
-  transform: translateX(-10px);
-  transition:
-    opacity .28s var(--ease-soft),
-    transform .28s var(--ease-soft),
-    color .2s,
-    border-color .2s;
-}
-.sidebar-tab svg { width: 15px; height: 15px; }
-.sidebar-tab:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.layout.sidebar-collapsed .sidebar-tab {
-  display: flex;
-  opacity: 1;
-  transform: translateX(0);
-  transition-delay: .12s;
-}
+/* La pestaña lateral queda oculta: el FAB cumple su función */
+.sidebar-tab { display: none !important; }
 
 /* Search */
 .search-box {
@@ -434,17 +397,35 @@ a { color: var(--accent); }
 }
 .placement-cancel:hover { background: rgba(255,255,255,.35); }
 
+/* ── FAB — esquina superior izquierda del mapa ─────── */
 .fab-menu {
-  position: absolute; bottom: 1.25rem; right: 1rem; z-index: 400;
-  width: 44px; height: 44px; border-radius: 12px;
-  background: var(--surface); border: 1px solid var(--border2);
-  color: var(--text-2); display: flex; align-items: center; justify-content: center;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 400;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: var(--shadow);
-  transition: transform .2s var(--ease-soft), background .2s, color .2s, border-color .2s, box-shadow .2s;
+  transition:
+    transform .2s var(--ease-soft),
+    background .2s,
+    color .2s,
+    border-color .2s,
+    box-shadow .2s,
+    opacity .28s var(--ease-soft);
 }
 .fab-menu svg { width: 18px; height: 18px; }
 .fab-menu:hover {
-  background: var(--accent); color: #fff; border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
   transform: scale(1.05);
   box-shadow: 0 4px 14px rgba(var(--accent-r),.35);
 }
@@ -755,14 +736,17 @@ a { color: var(--accent); }
     max-width: 340px;
     box-shadow: var(--shadow-lg);
   }
-  .sidebar.hidden {
-    /* más profundo en mobile para que se sienta más evidente */
-    box-shadow: 0 0 0 rgba(0,0,0,0);
-  }
+  .sidebar.hidden { box-shadow: 0 0 0 rgba(0,0,0,0); }
 
   .map-wrap { margin-left: 0 !important; }
 
-  .sidebar-tab { display: none !important; }
+  /* Cuando el sidebar está abierto en mobile, ocultamos el FAB
+     para que no quede flotando sobre la lista */
+  .layout:not(.sidebar-collapsed) .fab-menu {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(.9);
+  }
 
   .detail-card {
     top: .5rem;
@@ -773,6 +757,12 @@ a { color: var(--accent); }
     max-height: 55%;
     border-radius: 14px;
     transform-origin: top center;
+  }
+
+  /* El FAB ya no está abajo: quitamos el override que lo empujaba */
+  .fab-menu {
+    top: .75rem;
+    left: .75rem;
   }
 
   .stats-strip { display: none; }
@@ -789,12 +779,11 @@ a { color: var(--accent); }
   }
   .placement-cancel { font-size: 0.68rem; padding: 0.15rem 0.5rem; }
 
-  .leaflet-control-zoom { bottom: 80px !important; right: 10px !important; }
+  .leaflet-control-zoom { bottom: 20px !important; right: 10px !important; }
   .leaflet-control-zoom a {
     width: 34px !important; height: 34px !important;
     line-height: 34px !important; font-size: 18px !important;
   }
-  .fab-menu { bottom: 80px !important; }
 }
 
 @media (max-width: 480px) {
@@ -838,6 +827,9 @@ a { color: var(--accent); }
   .st-tags { gap: 0.2rem; }
   .stag { font-size: 0.57rem; padding: 0.12rem 0.33rem; }
 
+  .fab-menu { width: 38px; height: 38px; top: .6rem; left: .6rem; }
+  .fab-menu svg { width: 16px; height: 16px; }
+
   .detail-card { max-height: 62%; }
   .detail-body { padding: 0.9rem 0.95rem; }
   .d-name { font-size: 1.1rem; }
@@ -877,6 +869,8 @@ a { color: var(--accent); }
   .ctrl-btn { font-size: 0.6rem; padding: 0.25rem 0.4rem; min-width: 32px; }
   .lang-toggle, .theme-toggle { font-size: 0.55rem; padding: 0.25rem 0.4rem; min-width: 32px; }
   .topbar { padding: 0 0.4rem; }
+
+  .fab-menu { width: 36px; height: 36px; top: .5rem; left: .5rem; }
 }
 
 @media (max-width: 900px) and (orientation: portrait) {
