@@ -1,18 +1,14 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v3.2
-   Multi-source fusion · Map-first add flow · Smart merge
-   Tiles: OpenStreetMap (sin API key)
-   Mobile: sidebar auto-oculta, detail se cierra al drag
+   PUNTO ELÉCTRICO CR — app.js v3.3
+   Sidebar retraíble + detail como burbuja flotante
    ════════════════════════════════════════════════════════ */
 
 function getEnvironment() {
   const host = window.location.hostname;
-
   if (host === 'localhost' || host === '127.0.0.1') return 'local';
   if (host.includes('staging')) return 'staging';
   if (host.includes('dev')) return 'development';
   if (host.includes('github.io')) return 'production';
-
   return 'production';
 }
 
@@ -31,9 +27,7 @@ console.log(`🔗 API_URL: ${API_URL}`);
 
 const CR_CENTER = [9.9340, -84.0870];
 
-/* ══════════════════════════════════════════════════════════
-   DATASET LOCAL CR
-   ══════════════════════════════════════════════════════════ */
+/* ── DATASET LOCAL CR ─────────────────────────────────── */
 const LOCAL_CR = [
   { id: 'lcr_001', name: 'ICE Centro Nacional - La Sabana', address: 'Sabana Norte, San José', province: 'San José', lat: 9.9387, lon: -84.1050, status: 50, points: 4, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00' },
   { id: 'lcr_002', name: 'JASEC - Cartago Centro', address: 'Frente al estadio, Cartago', province: 'Cartago', lat: 9.8643, lon: -83.9191, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'JASEC', hours: '24/7' },
@@ -173,7 +167,6 @@ const S = {
   pendingLon: null,
 };
 
-/* ── TILES — OpenStreetMap ───────────────────────────── */
 const TILES = {
   day:   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   night: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -201,6 +194,15 @@ function isMobile() {
   return window.matchMedia('(max-width: 900px)').matches;
 }
 
+function updateLayoutClass() {
+  const layout = $('layout');
+  if ($('sidebar').classList.contains('hidden')) {
+    layout.classList.add('sidebar-collapsed');
+  } else {
+    layout.classList.remove('sidebar-collapsed');
+  }
+}
+
 function closeDetailPanel() {
   $('detailPanel').classList.remove('open');
   S.activeId = null;
@@ -210,13 +212,15 @@ function closeDetailPanel() {
 function openSidebar() {
   $('sidebar').classList.remove('hidden');
   if (isMobile()) $('sidebarBackdrop').classList.add('visible');
-  S.map.invalidateSize();
+  updateLayoutClass();
+  setTimeout(() => S.map && S.map.invalidateSize(), 350);
 }
 
 function closeSidebar() {
   $('sidebar').classList.add('hidden');
   $('sidebarBackdrop').classList.remove('visible');
-  S.map.invalidateSize();
+  updateLayoutClass();
+  setTimeout(() => S.map && S.map.invalidateSize(), 350);
 }
 
 /* ── DISTANCE ────────────────────────────────────────── */
@@ -271,12 +275,10 @@ function initMap() {
   });
   S.map.addLayer(S.cluster);
 
-  /* Mobile: cerrar detail al empezar a arrastrar el mapa */
   S.map.on('dragstart', () => {
     if (isMobile() && S.activeId) closeDetailPanel();
   });
 
-  /* Click en mapa → colocar pin */
   S.map.on('click', e => {
     if (!S.addMode) return;
     const { lat, lng } = e.latlng;
@@ -314,9 +316,7 @@ function pinIcon(color, emoji = '⚡') {
   });
 }
 
-/* ══════════════════════════════════════════════════════════
-   FETCH — backend Render
-   ══════════════════════════════════════════════════════════ */
+/* ── FETCH backend ───────────────────────────────────── */
 async function fetchOCM() {
   try {
     const res = await fetch(`${API_URL}/api/estaciones`);
@@ -331,11 +331,8 @@ async function fetchOCM() {
   buildAll();
 }
 
-/* ══════════════════════════════════════════════════════════
-   NORMALIZE + MERGE
-   ══════════════════════════════════════════════════════════ */
+/* ── NORMALIZE + MERGE ───────────────────────────────── */
 function buildAll() {
-
   const ocmList = S.ocm.map(s => {
     const info = s.AddressInfo || {};
     return {
@@ -531,7 +528,6 @@ function select(id) {
 
 /* ── DETAIL ──────────────────────────────────────────── */
 function renderDetail(s) {
-  const panel = $('detailPanel');
   const body  = $('detailBody');
   const st    = statusInfo(s.statusId);
   const color = statusColor(st.key);
@@ -566,13 +562,13 @@ function renderDetail(s) {
       <div class="d-status-dot" style="background:${color}"></div>
       <span class="d-status-txt" style="color:${color}">${statusLabel(st.key)}</span>
     </div>
-    ${s._user ? `<div style="margin-bottom:.5rem"><span class="d-user-badge">${t('userBadge')}</span></div>` : ''}
+    ${s._user ? `<span class="d-user-badge">${t('userBadge')}</span>` : ''}
     <div class="d-name">${s.name}</div>
     <div class="d-addr">${s.address}${s.province ? ' · ' + s.province : ''}</div>
 
     <div class="d-section">
       <div class="d-label">${t('detailConnectors')}</div>
-      <div class="d-grid" style="margin-bottom:.6rem">
+      <div class="d-grid" style="margin-bottom:.5rem">
         <div class="d-metric">
           <div class="d-metric-val">${s.points}</div>
           <div class="d-metric-key">${t('connPoints')}</div>
@@ -602,12 +598,10 @@ function renderDetail(s) {
       ${t('detailOpenMaps')}
     </a>
   `;
-  panel.classList.add('open');
+  $('detailPanel').classList.add('open');
 }
 
-/* ══════════════════════════════════════════════════════════
-   ADD STATION
-   ══════════════════════════════════════════════════════════ */
+/* ── ADD STATION ─────────────────────────────────────── */
 function enterPlacementMode() {
   S.addMode = true;
   S.pendingLat = null;
@@ -694,8 +688,6 @@ function locate() {
 function toggleTheme() {
   S.theme = S.theme === 'day' ? 'night' : 'day';
   document.documentElement.setAttribute('data-theme', S.theme);
-  /* No se recrea el tile layer: OSM sirve ambos temas con el mismo tile.
-     El look nocturno lo aplica CSS sobre .leaflet-tile-pane. */
 }
 function toggleLang() {
   S.lang = S.lang === 'es' ? 'en' : 'es';
@@ -703,7 +695,7 @@ function toggleLang() {
   applyI18n();
 }
 
-/* ── FILTERS ─────────────────────────────────────────── */
+/* ── FILTERS UI ──────────────────────────────────────── */
 function initFilters() {
   let timer;
   $('searchInput').addEventListener('input', e => {
@@ -724,13 +716,19 @@ function initFilters() {
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
 function initSidebar() {
+  // Botón dentro del sidebar (colapsar)
+  $('sidebarCollapse').addEventListener('click', closeSidebar);
+
+  // Pestaña lateral (expandir en desktop)
+  $('sidebarTab').addEventListener('click', openSidebar);
+
+  // FAB (mobile)
   $('fabSidebar').addEventListener('click', () => {
-    if ($('sidebar').classList.contains('hidden')) {
-      openSidebar();
-    } else {
-      closeSidebar();
-    }
+    if ($('sidebar').classList.contains('hidden')) openSidebar();
+    else closeSidebar();
   });
+
+  // Backdrop en mobile
   $('sidebarBackdrop').addEventListener('click', closeSidebar);
 }
 
@@ -740,12 +738,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initFilters();
   initSidebar();
 
-  /* En mobile el sidebar arranca oculto */
+  // En mobile el sidebar arranca oculto
   if (isMobile()) {
     $('sidebar').classList.add('hidden');
   }
+  updateLayoutClass();
 
-  /* Al cruzar el breakpoint, ajustar sidebar */
+  // Al cruzar el breakpoint mobile/desktop
   let prevMobile = isMobile();
   window.addEventListener('resize', () => {
     const nowMobile = isMobile();
@@ -753,8 +752,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (nowMobile) {
         closeSidebar();
       } else {
-        $('sidebar').classList.remove('hidden');
         $('sidebarBackdrop').classList.remove('visible');
+        updateLayoutClass();
         S.map.invalidateSize();
       }
       prevMobile = nowMobile;
