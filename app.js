@@ -358,7 +358,14 @@ function applyI18n() {
 
 /* ── MAP INIT ────────────────────────────────────────── */
 function initMap() {
-  S.map = L.map('map', { center: CR_CENTER, zoom: 8, zoomControl: true });
+  S.map = L.map('map', {
+    center: CR_CENTER,
+    zoom: 8,
+    zoomControl: true,
+    minZoom: 7,
+    maxBounds: [[7.0, -88.0], [12.5, -81.5]],
+    maxBoundsViscosity: 1.0,
+  });
   tileLayer = L.tileLayer(TILES[S.theme], { attribution: ATTR, maxZoom: 19 });
   tileLayer.addTo(S.map);
 
