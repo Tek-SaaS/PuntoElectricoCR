@@ -1,12 +1,9 @@
 /* ════════════════════════════════════════════════════════
-   PUNTO ELÉCTRICO CR — app.js v3.1
+   PUNTO ELÉCTRICO CR — app.js v3.2
    Multi-source fusion · Map-first add flow · Smart merge
    Tiles: OpenStreetMap (sin API key)
+   Mobile: sidebar auto-oculta, detail se cierra al drag
    ════════════════════════════════════════════════════════ */
-
-// ══════════════════════════════════════════════════════════
-//  CONFIGURACIÓN DE ENTORNOS - EL BACKEND OCULTA LA API KEY
-// ══════════════════════════════════════════════════════════
 
 function getEnvironment() {
   const host = window.location.hostname;
@@ -35,156 +32,24 @@ console.log(`🔗 API_URL: ${API_URL}`);
 const CR_CENTER = [9.9340, -84.0870];
 
 /* ══════════════════════════════════════════════════════════
-   DATASET LOCAL CR — estaciones conocidas de Costa Rica
+   DATASET LOCAL CR
    ══════════════════════════════════════════════════════════ */
 const LOCAL_CR = [
-  {
-    id: 'lcr_001', name: 'ICE Centro Nacional - La Sabana',
-    address: 'Sabana Norte, San José', province: 'San José',
-    lat: 9.9387, lon: -84.1050, status: 50, points: 4,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00',
-  },
-  {
-    id: 'lcr_002', name: 'JASEC - Cartago Centro',
-    address: 'Frente al estadio, Cartago', province: 'Cartago',
-    lat: 9.8643, lon: -83.9191, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'JASEC', hours: '24/7',
-  },
-  {
-    id: 'lcr_003', name: 'Multiplaza Escazú',
-    address: 'Escazú, San José', province: 'San José',
-    lat: 9.9180, lon: -84.1417, status: 50, points: 4,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-      { name: 'CHAdeMO', kw: 50 },
-    ],
-    cost: 'De pago', network: 'EV Connect', hours: '7:00-22:00',
-  },
-  {
-    id: 'lcr_004', name: 'Mall San Pedro',
-    address: 'San Pedro de Montes de Oca, San José', province: 'San José',
-    lat: 9.9349, lon: -84.0490, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'Privado', hours: '9:00-21:00',
-  },
-  {
-    id: 'lcr_005', name: 'Aeropuerto Juan Santamaría',
-    address: 'Terminal de pasajeros, Alajuela', province: 'Alajuela',
-    lat: 9.9983, lon: -84.2088, status: 50, points: 3,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'ICE', hours: '24/7',
-  },
-  {
-    id: 'lcr_006', name: 'CNFL - Ave 10 San José',
-    address: 'Av 10, San José Centro', province: 'San José',
-    lat: 9.9305, lon: -84.0751, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-    ],
-    cost: 'De pago', network: 'CNFL', hours: 'L-V 7:00-17:00',
-  },
-  {
-    id: 'lcr_007', name: 'Walmart Tibás',
-    address: 'Tibás, San José', province: 'San José',
-    lat: 9.9675, lon: -84.0770, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'Privado', hours: '7:00-22:00',
-  },
-  {
-    id: 'lcr_008', name: 'Universidad de Costa Rica',
-    address: 'Ciudad Universitaria Rodrigo Facio, San Pedro', province: 'San José',
-    lat: 9.9373, lon: -84.0510, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 7.4 },
-    ],
-    cost: 'Gratuito', network: 'UCR', hours: 'L-V 7:00-20:00',
-  },
-  {
-    id: 'lcr_009', name: 'ICE Liberia - Guanacaste',
-    address: 'Liberia, Guanacaste', province: 'Guanacaste',
-    lat: 10.6338, lon: -85.4365, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00',
-  },
-  {
-    id: 'lcr_010', name: 'Automercado La Colonia Tres Ríos',
-    address: 'Tres Ríos, Cartago', province: 'Cartago',
-    lat: 9.8996, lon: -83.9958, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'Privado', hours: '8:00-20:00',
-  },
-  {
-    id: 'lcr_011', name: 'La Colonia Heredia',
-    address: 'Centro de Heredia', province: 'Heredia',
-    lat: 9.9985, lon: -84.1169, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-    ],
-    cost: 'De pago', network: 'Privado', hours: '8:00-20:00',
-  },
-  {
-    id: 'lcr_012', name: 'ICE Puerto Limón',
-    address: 'Limón Centro', province: 'Limón',
-    lat: 10.0037, lon: -83.0780, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-    ],
-    cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00',
-  },
-  {
-    id: 'lcr_013', name: 'Multiplaza del Este',
-    address: 'Curridabat, San José', province: 'San José',
-    lat: 9.9108, lon: -84.0230, status: 50, points: 4,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-      { name: 'CCS (Type 2)', kw: 50 },
-      { name: 'CHAdeMO', kw: 50 },
-    ],
-    cost: 'De pago', network: 'EV Connect', hours: '10:00-21:00',
-  },
-  {
-    id: 'lcr_014', name: 'Puntarenas Puerto - INCOP',
-    address: 'Puntarenas Centro', province: 'Puntarenas',
-    lat: 9.9789, lon: -84.8346, status: 75, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 22 },
-    ],
-    cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00',
-  },
-  {
-    id: 'lcr_015', name: 'TEC Cartago - Campus Central',
-    address: 'Cartago, Instituto Tecnológico', province: 'Cartago',
-    lat: 9.8561, lon: -83.9143, status: 50, points: 2,
-    connections: [
-      { name: 'Type 2 (Mennekes)', kw: 7.4 },
-    ],
-    cost: 'Gratuito', network: 'TEC', hours: 'L-V 7:00-21:00',
-  },
+  { id: 'lcr_001', name: 'ICE Centro Nacional - La Sabana', address: 'Sabana Norte, San José', province: 'San José', lat: 9.9387, lon: -84.1050, status: 50, points: 4, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00' },
+  { id: 'lcr_002', name: 'JASEC - Cartago Centro', address: 'Frente al estadio, Cartago', province: 'Cartago', lat: 9.8643, lon: -83.9191, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'JASEC', hours: '24/7' },
+  { id: 'lcr_003', name: 'Multiplaza Escazú', address: 'Escazú, San José', province: 'San José', lat: 9.9180, lon: -84.1417, status: 50, points: 4, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }, { name: 'CHAdeMO', kw: 50 }], cost: 'De pago', network: 'EV Connect', hours: '7:00-22:00' },
+  { id: 'lcr_004', name: 'Mall San Pedro', address: 'San Pedro de Montes de Oca, San José', province: 'San José', lat: 9.9349, lon: -84.0490, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'Privado', hours: '9:00-21:00' },
+  { id: 'lcr_005', name: 'Aeropuerto Juan Santamaría', address: 'Terminal de pasajeros, Alajuela', province: 'Alajuela', lat: 9.9983, lon: -84.2088, status: 50, points: 3, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'ICE', hours: '24/7' },
+  { id: 'lcr_006', name: 'CNFL - Ave 10 San José', address: 'Av 10, San José Centro', province: 'San José', lat: 9.9305, lon: -84.0751, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }], cost: 'De pago', network: 'CNFL', hours: 'L-V 7:00-17:00' },
+  { id: 'lcr_007', name: 'Walmart Tibás', address: 'Tibás, San José', province: 'San José', lat: 9.9675, lon: -84.0770, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'Privado', hours: '7:00-22:00' },
+  { id: 'lcr_008', name: 'Universidad de Costa Rica', address: 'Ciudad Universitaria Rodrigo Facio, San Pedro', province: 'San José', lat: 9.9373, lon: -84.0510, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 7.4 }], cost: 'Gratuito', network: 'UCR', hours: 'L-V 7:00-20:00' },
+  { id: 'lcr_009', name: 'ICE Liberia - Guanacaste', address: 'Liberia, Guanacaste', province: 'Guanacaste', lat: 10.6338, lon: -85.4365, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00' },
+  { id: 'lcr_010', name: 'Automercado La Colonia Tres Ríos', address: 'Tres Ríos, Cartago', province: 'Cartago', lat: 9.8996, lon: -83.9958, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'Privado', hours: '8:00-20:00' },
+  { id: 'lcr_011', name: 'La Colonia Heredia', address: 'Centro de Heredia', province: 'Heredia', lat: 9.9985, lon: -84.1169, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }], cost: 'De pago', network: 'Privado', hours: '8:00-20:00' },
+  { id: 'lcr_012', name: 'ICE Puerto Limón', address: 'Limón Centro', province: 'Limón', lat: 10.0037, lon: -83.0780, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }], cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00' },
+  { id: 'lcr_013', name: 'Multiplaza del Este', address: 'Curridabat, San José', province: 'San José', lat: 9.9108, lon: -84.0230, status: 50, points: 4, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }, { name: 'CCS (Type 2)', kw: 50 }, { name: 'CHAdeMO', kw: 50 }], cost: 'De pago', network: 'EV Connect', hours: '10:00-21:00' },
+  { id: 'lcr_014', name: 'Puntarenas Puerto - INCOP', address: 'Puntarenas Centro', province: 'Puntarenas', lat: 9.9789, lon: -84.8346, status: 75, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 22 }], cost: 'De pago', network: 'ICE', hours: 'L-V 7:00-17:00' },
+  { id: 'lcr_015', name: 'TEC Cartago - Campus Central', address: 'Cartago, Instituto Tecnológico', province: 'Cartago', lat: 9.8561, lon: -83.9143, status: 50, points: 2, connections: [{ name: 'Type 2 (Mennekes)', kw: 7.4 }], cost: 'Gratuito', network: 'TEC', hours: 'L-V 7:00-21:00' },
 ];
 
 /* ── TRANSLATIONS ─────────────────────────────────────── */
@@ -308,7 +173,7 @@ const S = {
   pendingLon: null,
 };
 
-/* ── TILES — OpenStreetMap (sin API key) ─────────────── */
+/* ── TILES — OpenStreetMap ───────────────────────────── */
 const TILES = {
   day:   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   night: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -331,7 +196,30 @@ function saveUser() {
   localStorage.setItem('pe_user_stations', JSON.stringify(S.user));
 }
 
-/* ── DISTANCE en km (Haversine) ──────────────────────── */
+/* ── MOBILE HELPERS ──────────────────────────────────── */
+function isMobile() {
+  return window.matchMedia('(max-width: 900px)').matches;
+}
+
+function closeDetailPanel() {
+  $('detailPanel').classList.remove('open');
+  S.activeId = null;
+  document.querySelectorAll('.st-item').forEach(el => el.classList.remove('active'));
+}
+
+function openSidebar() {
+  $('sidebar').classList.remove('hidden');
+  if (isMobile()) $('sidebarBackdrop').classList.add('visible');
+  S.map.invalidateSize();
+}
+
+function closeSidebar() {
+  $('sidebar').classList.add('hidden');
+  $('sidebarBackdrop').classList.remove('visible');
+  S.map.invalidateSize();
+}
+
+/* ── DISTANCE ────────────────────────────────────────── */
 function distKm(la1, lo1, la2, lo2) {
   const R = 6371, dLa = (la2-la1)*Math.PI/180, dLo = (lo2-lo1)*Math.PI/180;
   const a = Math.sin(dLa/2)**2 + Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dLo/2)**2;
@@ -383,7 +271,12 @@ function initMap() {
   });
   S.map.addLayer(S.cluster);
 
-  /* ── MAP CLICK → colocar pin ── */
+  /* Mobile: cerrar detail al empezar a arrastrar el mapa */
+  S.map.on('dragstart', () => {
+    if (isMobile() && S.activeId) closeDetailPanel();
+  });
+
+  /* Click en mapa → colocar pin */
   S.map.on('click', e => {
     if (!S.addMode) return;
     const { lat, lng } = e.latlng;
@@ -402,9 +295,7 @@ function initMap() {
       zIndexOffset: 9999,
     }).addTo(S.map);
 
-    $('coordsPillText').textContent =
-      `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-
+    $('coordsPillText').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     $('addForm').querySelector('.btn-pri').disabled = false;
 
     hidePlacementBanner();
@@ -412,13 +303,6 @@ function initMap() {
 
     toast(t('toastPinSet'));
   });
-}
-
-function switchTile() {
-  if (tileLayer) S.map.removeLayer(tileLayer);
-  tileLayer = L.tileLayer(TILES[S.theme], { attribution: ATTR, maxZoom: 19 });
-  tileLayer.addTo(S.map);
-  tileLayer.bringToBack();
 }
 
 /* ── PIN ICON ────────────────────────────────────────── */
@@ -431,19 +315,14 @@ function pinIcon(color, emoji = '⚡') {
 }
 
 /* ══════════════════════════════════════════════════════════
-   FETCH OCM — AHORA LLAMA AL BACKEND (Render)
+   FETCH — backend Render
    ══════════════════════════════════════════════════════════ */
 async function fetchOCM() {
   try {
     const res = await fetch(`${API_URL}/api/estaciones`);
-
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-    }
-
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     S.ocm = await res.json();
     console.log(`✅ ${S.ocm.length} estaciones cargadas desde el backend (${ENV})`);
-
   } catch (e) {
     console.warn('Error al cargar desde el backend:', e);
     toast(t('toastApiErr'), 5000);
@@ -453,11 +332,10 @@ async function fetchOCM() {
 }
 
 /* ══════════════════════════════════════════════════════════
-   NORMALIZE + MULTI-SOURCE MERGE
+   NORMALIZE + MERGE
    ══════════════════════════════════════════════════════════ */
 function buildAll() {
 
-  /* 1. Normalizar OCM — se toman TODOS, sin filtrar */
   const ocmList = S.ocm.map(s => {
     const info = s.AddressInfo || {};
     return {
@@ -485,7 +363,6 @@ function buildAll() {
     };
   });
 
-  /* 2. Normalizar LOCAL CR */
   const localList = LOCAL_CR.map(s => ({
     _id:      s.id,
     _source:  'local_cr',
@@ -508,7 +385,6 @@ function buildAll() {
     _sources: ['local_cr'],
   }));
 
-  /* 3. Normalizar usuario */
   const userList = S.user.map(u => ({
     _id:      'usr_' + u.id,
     _source:  'user',
@@ -531,7 +407,6 @@ function buildAll() {
     _sources: ['user'],
   }));
 
-  /* 4. OCM enriquecido con datos locales */
   const ENRICH_RADIUS = 0.15;
   const enriched = ocmList.map(ocm => {
     const nearby = localList.find(loc =>
@@ -554,14 +429,10 @@ function buildAll() {
     return e;
   });
 
-  /* 5. LOCAL CR solo como gap-filler */
-  const localGaps = localList.filter(loc => {
-    return !ocmList.some(ocm =>
-      distKm(loc.lat, loc.lon, ocm.lat, ocm.lon) < ENRICH_RADIUS
-    );
-  });
+  const localGaps = localList.filter(loc =>
+    !ocmList.some(ocm => distKm(loc.lat, loc.lon, ocm.lat, ocm.lon) < ENRICH_RADIUS)
+  );
 
-  /* 6. Combinar */
   S.all = [...enriched, ...localGaps, ...userList].filter(s => s.lat && s.lon);
   updateStats();
   applyFilters();
@@ -735,9 +606,8 @@ function renderDetail(s) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   ADD STATION — flujo en 3 pasos
+   ADD STATION
    ══════════════════════════════════════════════════════════ */
-
 function enterPlacementMode() {
   S.addMode = true;
   S.pendingLat = null;
@@ -753,12 +623,8 @@ function enterPlacementMode() {
   toast(t('toastSelectPoint'), 4000);
 }
 
-function showPlacementBanner() {
-  $('placementBanner').classList.add('visible');
-}
-function hidePlacementBanner() {
-  $('placementBanner').classList.remove('visible');
-}
+function showPlacementBanner() { $('placementBanner').classList.add('visible'); }
+function hidePlacementBanner() { $('placementBanner').classList.remove('visible'); }
 
 function openModal() {
   $('modalOverlay').classList.add('open');
@@ -783,10 +649,8 @@ function closeAll() {
   $('addForm').reset();
 }
 
-/* Submit del formulario */
 $('addForm').addEventListener('submit', e => {
   e.preventDefault();
-
   if (!S.pendingLat || !S.pendingLon) return;
 
   const connTypes = [...document.querySelectorAll('.check-group input:checked')].map(c => c.value);
@@ -814,7 +678,6 @@ $('addForm').addEventListener('submit', e => {
   buildAll();
   closeAll();
   toast(t('toastAdded'));
-
   setTimeout(() => select('usr_' + entry.id), 450);
 });
 
@@ -831,7 +694,8 @@ function locate() {
 function toggleTheme() {
   S.theme = S.theme === 'day' ? 'night' : 'day';
   document.documentElement.setAttribute('data-theme', S.theme);
-  switchTile();
+  /* No se recrea el tile layer: OSM sirve ambos temas con el mismo tile.
+     El look nocturno lo aplica CSS sobre .leaflet-tile-pane. */
 }
 function toggleLang() {
   S.lang = S.lang === 'es' ? 'en' : 'es';
@@ -861,9 +725,13 @@ function initFilters() {
 /* ── SIDEBAR ─────────────────────────────────────────── */
 function initSidebar() {
   $('fabSidebar').addEventListener('click', () => {
-    $('sidebar').classList.toggle('hidden');
-    S.map.invalidateSize();
+    if ($('sidebar').classList.contains('hidden')) {
+      openSidebar();
+    } else {
+      closeSidebar();
+    }
   });
+  $('sidebarBackdrop').addEventListener('click', closeSidebar);
 }
 
 /* ── BOOT ────────────────────────────────────────────── */
@@ -872,32 +740,44 @@ document.addEventListener('DOMContentLoaded', () => {
   initFilters();
   initSidebar();
 
+  /* En mobile el sidebar arranca oculto */
+  if (isMobile()) {
+    $('sidebar').classList.add('hidden');
+  }
+
+  /* Al cruzar el breakpoint, ajustar sidebar */
+  let prevMobile = isMobile();
+  window.addEventListener('resize', () => {
+    const nowMobile = isMobile();
+    if (nowMobile !== prevMobile) {
+      if (nowMobile) {
+        closeSidebar();
+      } else {
+        $('sidebar').classList.remove('hidden');
+        $('sidebarBackdrop').classList.remove('visible');
+        S.map.invalidateSize();
+      }
+      prevMobile = nowMobile;
+    }
+  });
+
   $('stationList').innerHTML = `<div class="list-state"><div class="spin-ring"></div><p>${t('loading')}</p></div>`;
 
-  /* Botones top bar */
   $('btnAdd').addEventListener('click', enterPlacementMode);
   $('btnLocate').addEventListener('click', locate);
   $('btnTheme').addEventListener('click', toggleTheme);
   $('btnLang').addEventListener('click', toggleLang);
 
-  /* Cancelar desde el banner */
   $('placementCancel').addEventListener('click', closeAll);
 
-  /* Cerrar modal */
   $('modalClose').addEventListener('click', closeAll);
   $('btnCancelForm').addEventListener('click', closeAll);
   $('modalOverlay').addEventListener('click', e => {
     if (e.target === $('modalOverlay')) closeAll();
   });
 
-  /* Cerrar detail panel */
-  $('detailClose').addEventListener('click', () => {
-    $('detailPanel').classList.remove('open');
-    S.activeId = null;
-    document.querySelectorAll('.st-item').forEach(el => el.classList.remove('active'));
-  });
+  $('detailClose').addEventListener('click', closeDetailPanel);
 
-  /* Atajos de teclado */
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeAll();
     if (e.key === '/' && document.activeElement !== $('searchInput')) {

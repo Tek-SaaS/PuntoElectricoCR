@@ -2,13 +2,11 @@
 <html lang="es" data-theme="day" data-lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Punto Eléctrico CR — Red de Carga Costa Rica</title>
   <meta name="description" content="Mapa interactivo de cargadores para vehículos eléctricos en Costa Rica." />
 
-  <!-- ⚡ Favicon SVG con rayo en verde -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b6b3a'/%3E%3Cpath d='M20 3L9 18h8l-5 11L26 14h-9z' fill='%23ffffff'/%3E%3C/svg%3E">
-  <!-- Fallback PNG favicon para navegadores que no soporten SVG -->
   <link rel="alternate icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAB3RJTUUH5wMKEBcKlGgVLQAAAVVJREFUWMPtlrFKA0EQhr9LLiSFkMIiWFhYWFhYWFhYWFhYWFhYWFhYWFhYBAsLCwsLC4uQwsLCwsLCwsLCwsLCwsIiJOQsJOTuLCwsLCwsLCwsLCwsLCwsLCwsLEIOSSAkhRBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQnQdEdEVEXsRsSci9iLiICJOIuIyIs4i4iIiriLiKiLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCLOIuIsIs4i4iwiziLiLCIuAAAAAABJRU5ErkJggg==">
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
@@ -19,7 +17,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Vercel Web Analytics -->
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -27,7 +24,6 @@
 </head>
 <body>
 
-  <!-- TOP BAR -->
   <header class="topbar" id="topbar">
     <div class="topbar-left">
       <div class="logo">
@@ -52,29 +48,27 @@
       </div>
     </div>
     <div class="topbar-right">
-      <button class="ctrl-btn" id="btnLocate">
+      <button class="ctrl-btn" id="btnLocate" aria-label="Localizar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
       </button>
       <button class="ctrl-btn accent" id="btnAdd">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         <span data-i18n="addStation">Agregar</span>
       </button>
-      <button class="lang-toggle" id="btnLang">
+      <button class="lang-toggle" id="btnLang" aria-label="Cambiar idioma">
         <span class="l-es">ES</span>
         <span class="l-div">/</span>
         <span class="l-en">EN</span>
       </button>
-      <button class="theme-toggle" id="btnTheme">
+      <button class="theme-toggle" id="btnTheme" aria-label="Cambiar tema">
         <span class="t-day">☀</span>
         <span class="t-night">☽</span>
       </button>
     </div>
   </header>
 
-  <!-- LAYOUT -->
   <div class="layout">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-top">
         <div class="search-box">
@@ -110,11 +104,11 @@
       </div>
     </aside>
 
-    <!-- MAP -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
     <div class="map-wrap">
       <div id="map"></div>
 
-      <!-- Banner de instrucciones cuando está en modo colocar pin -->
       <div class="placement-banner" id="placementBanner">
         <div class="placement-banner-inner">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -126,14 +120,13 @@
         </div>
       </div>
 
-      <button class="fab-menu" id="fabSidebar">
+      <button class="fab-menu" id="fabSidebar" aria-label="Mostrar lista">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="12" y2="18"/></svg>
       </button>
     </div>
 
-    <!-- DETAIL PANEL -->
     <div class="detail-panel" id="detailPanel">
-      <button class="detail-close" id="detailClose">
+      <button class="detail-close" id="detailClose" aria-label="Cerrar detalle">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
       <div class="detail-body" id="detailBody"></div>
@@ -141,25 +134,22 @@
 
   </div>
 
-  <!-- ADD MODAL — bottom sheet -->
   <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-drag-handle"></div>
       <div class="modal-header">
         <h2 data-i18n="addModalTitle">Agregar Estación</h2>
-        <button class="modal-x" id="modalClose">
+        <button class="modal-x" id="modalClose" aria-label="Cerrar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-scroll">
-        <!-- Coords confirmadas pill -->
         <div class="coords-pill" id="coordsPill">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           <span id="coordsPillText">—</span>
         </div>
 
         <form id="addForm">
-          <!-- Lat / Lon hidden pero enviados -->
           <input type="hidden" id="f_lat" />
           <input type="hidden" id="f_lon" />
 
@@ -232,7 +222,6 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
