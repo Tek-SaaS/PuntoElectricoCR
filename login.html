@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="day" data-lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Iniciar sesión — Punto Eléctrico CR</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b6b3a'/%3E%3Cpath d='M20 3L9 18h8l-5 11L26 14h-9z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/auth.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="logo">
+        <span class="logo-bolt">⚡</span>
+        <span class="logo-name" data-i18n="appName">Punto Eléctrico CR</span>
+      </a>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" data-lang-toggle><span class="l-es">ES</span><span class="l-div">/</span><span class="l-en">EN</span></button>
+      <button class="theme-toggle" data-theme-toggle><span class="t-day">☀</span><span class="t-night">☽</span></button>
+    </div>
+  </header>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+      <h1 class="auth-title" data-i18n="loginTitle">Iniciar sesión</h1>
+      <p class="auth-sub" data-i18n="loginSub">Accede para guardar tus aportes.</p>
+
+      <form id="loginForm" class="auth-form">
+        <div class="fg">
+          <label data-i18n="fEmail">Correo</label>
+          <input type="email" id="email" required autocomplete="email" />
+        </div>
+        <div class="fg">
+          <label data-i18n="fPassword">Contraseña</label>
+          <input type="password" id="password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn-pri auth-submit" data-i18n="login">Iniciar sesión</button>
+      </form>
+
+      <p class="auth-alt">
+        <span data-i18n="noAccount">¿No tienes cuenta?</span>
+        <a href="register.html" data-i18n="createOne">Crear una</a>
+      </p>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/js/shared.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "items": [
+    {
+      "id": "n001",
+      "date": "2026-01-15",
+      "title": "Nuevos cargadores rápidos en Guanacaste",
+      "excerpt": "ICE instaló cuatro puntos de carga rápida en la ruta hacia las playas del Pacífico Norte.",
+      "tag": "Infraestructura"
+    },
+    {
+      "id": "n002",
+      "date": "2026-01-08",
+      "title": "Guía: cómo cargar tu VE en casa",
+      "excerpt": "Todo lo que necesitás saber sobre instalación, potencia y costos.",
+      "tag": "Guías"
+    },
+    {
+      "id": "n003",
+      "date": "2026-01-02",
+      "title": "Ventas de eléctricos crecieron 45% en 2025",
+      "excerpt": "Costa Rica sigue liderando la adopción de vehículos eléctricos en Centroamérica.",
+      "tag": "Estadísticas"
+    }
+  ]
+}

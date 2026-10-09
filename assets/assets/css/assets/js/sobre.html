@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="day" data-lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Sobre — Punto Eléctrico CR</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b6b3a'/%3E%3Cpath d='M20 3L9 18h8l-5 11L26 14h-9z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=Epilogue:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/base.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="logo">
+        <span class="logo-bolt">⚡</span>
+        <span class="logo-name" data-i18n="appName">Punto Eléctrico CR</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html" class="nav-link" data-i18n="navMap">Mapa</a>
+        <a href="home.html" class="nav-link" data-i18n="navHome">Noticias</a>
+        <a href="sobre.html" class="nav-link" data-i18n="navAbout">Sobre</a>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <button class="lang-toggle" data-lang-toggle><span class="l-es">ES</span><span class="l-div">/</span><span class="l-en">EN</span></button>
+      <button class="theme-toggle" data-theme-toggle><span class="t-day">☀</span><span class="t-night">☽</span></button>
+    </div>
+  </header>
+
+  <main class="page" style="max-width:720px;">
+    <h1 class="page-title">Sobre Punto Eléctrico CR</h1>
+    <p class="page-subtitle">Un mapa abierto, hecho por la comunidad, para quien maneja eléctrico en Costa Rica.</p>
+
+    <h2 style="font-family:'Fraunces',serif; font-size:1.15rem; margin:1.5rem 0 .5rem; color:var(--text);">¿Qué es?</h2>
+    <p style="color:var(--text-2); line-height:1.7; margin-bottom:1rem;">
+      Punto Eléctrico CR es una herramienta gratuita que reúne la información de cargadores para vehículos eléctricos en Costa Rica. Los datos vienen de Open Charge Map, de una base local curada por la comunidad, y de los aportes que cualquier persona puede hacer desde el mismo mapa.
+    </p>
+
+    <h2 style="font-family:'Fraunces',serif; font-size:1.15rem; margin:1.5rem 0 .5rem; color:var(--text);">¿Por qué?</h2>
+    <p style="color:var(--text-2); line-height:1.7; margin-bottom:1rem;">
+      Porque cada vez hay más eléctricos en el país, pero la información de cargadores está dispersa. Aquí la gente aporta lo que sabe y todos ganan.
+    </p>
+
+    <h2 style="font-family:'Fraunces',serif; font-size:1.15rem; margin:1.5rem 0 .5rem; color:var(--text);">¿Cómo contribuir?</h2>
+    <p style="color:var(--text-2); line-height:1.7; margin-bottom:1rem;">
+      Desde el mapa: tocás "Agregar", marcas la ubicación y llenás el formulario. Si querés ir más allá, el código está en GitHub y aceptamos pull requests.
+    </p>
+
+    <h2 style="font-family:'Fraunces',serif; font-size:1.15rem; margin:1.5rem 0 .5rem; color:var(--text);">Créditos</h2>
+    <ul style="color:var(--text-2); line-height:1.7; padding-left:1.25rem;">
+      <li><a href="https://openchargemap.org/" target="_blank" rel="noopener">Open Charge Map</a> — datos globales de cargadores (ODbL).</li>
+      <li><a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a> — tiles base (ODbL).</li>
+      <li><a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> — motor del mapa (BSD-2).</li>
+    </ul>
+
+    <p style="color:var(--text-3); font-size:.85rem; margin-top:2rem; line-height:1.6;">
+      Este proyecto no está afiliado con ninguna de esas organizaciones. Es un esfuerzo independiente hecho en Costa Rica 🇨🇷.
+    </p>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="assets/js/shared.js"></script>
+</body>
+</html>
